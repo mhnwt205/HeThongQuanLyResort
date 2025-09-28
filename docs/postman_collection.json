@@ -1,0 +1,397 @@
+{
+  "info": {
+    "name": "Resort Management API",
+    "description": "API collection for Resort Management System",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "API Documentation",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/docs",
+          "host": ["{{base_url}}"],
+          "path": ["docs"]
+        }
+      }
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Get All Bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["bookings"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Booking by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings/1",
+              "host": ["{{base_url}}"],
+              "path": ["bookings", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create New Booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"roomId\": 1,\n  \"checkInDate\": \"2024-12-20\",\n  \"checkOutDate\": \"2024-12-22\",\n  \"adults\": 2,\n  \"children\": 0,\n  \"specialRequests\": \"Late check-in after 10 PM\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["bookings"]
+            }
+          }
+        },
+        {
+          "name": "Update Booking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"checkInDate\": \"2024-12-21\",\n  \"checkOutDate\": \"2024-12-23\",\n  \"adults\": 2,\n  \"children\": 1,\n  \"specialRequests\": \"Updated request\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings/1",
+              "host": ["{{base_url}}"],
+              "path": ["bookings", "1"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings/1",
+              "host": ["{{base_url}}"],
+              "path": ["bookings", "1"]
+            }
+          }
+        },
+        {
+          "name": "Check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actualAdults\": 2,\n  \"actualChildren\": 0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings/1/checkin",
+              "host": ["{{base_url}}"],
+              "path": ["bookings", "1", "checkin"]
+            }
+          }
+        },
+        {
+          "name": "Check-out",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings/1/checkout",
+              "host": ["{{base_url}}"],
+              "path": ["bookings", "1", "checkout"]
+            }
+          }
+        },
+        {
+          "name": "Get Available Rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings/available-rooms?checkInDate=2024-12-20&checkOutDate=2024-12-22",
+              "host": ["{{base_url}}"],
+              "path": ["bookings", "available-rooms"],
+              "query": [
+                {
+                  "key": "checkInDate",
+                  "value": "2024-12-20"
+                },
+                {
+                  "key": "checkOutDate",
+                  "value": "2024-12-22"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Bookings by Date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bookings/by-date/2024-12-20",
+              "host": ["{{base_url}}"],
+              "path": ["bookings", "by-date", "2024-12-20"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Get All Invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payments/invoices?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "invoices"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Invoice by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payments/invoices/1",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "invoices", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create New Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"bookingId\": 1,\n  \"invoiceDate\": \"2024-12-20\",\n  \"dueDate\": \"2024-12-20\",\n  \"subtotal\": 3000000,\n  \"taxAmount\": 300000,\n  \"discountAmount\": 0,\n  \"totalAmount\": 3300000,\n  \"notes\": \"Room accommodation for 2 nights\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/invoices",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "Update Invoice",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subtotal\": 3500000,\n  \"taxAmount\": 350000,\n  \"totalAmount\": 3850000,\n  \"notes\": \"Updated invoice with additional services\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/invoices/1",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "invoices", "1"]
+            }
+          }
+        },
+        {
+          "name": "Add Invoice Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemType\": \"service\",\n  \"itemName\": \"Massage Thái\",\n  \"description\": \"Thai massage 60 minutes\",\n  \"quantity\": 1,\n  \"unitPrice\": 800000,\n  \"totalPrice\": 800000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/invoices/1/items",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "invoices", "1", "items"]
+            }
+          }
+        },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invoiceId\": 1,\n  \"paymentDate\": \"2024-12-20\",\n  \"amount\": 3300000,\n  \"paymentMethod\": \"credit_card\",\n  \"referenceNumber\": \"TXN123456789\",\n  \"notes\": \"Payment via credit card\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments",
+              "host": ["{{base_url}}"],
+              "path": ["payments"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payments/invoices/1/payments",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "invoices", "1", "payments"]
+            }
+          }
+        },
+        {
+          "name": "Get Revenue Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payments/revenue-report?startDate=2024-12-01&endDate=2024-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "revenue-report"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-12-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Customer Invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payments/customers/1/invoices",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "customers", "1", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "Print Invoice",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/payments/invoices/1/print",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "invoices", "1", "print"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+

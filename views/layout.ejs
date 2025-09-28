@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Paradise Resort & Spa' %></title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/images/hero-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 0;
+            margin-top: 50px;
+        }
+        
+        .admin-sidebar {
+            background: #2c3e50;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .admin-sidebar .nav-link {
+            color: #ecf0f1;
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin: 5px 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-sidebar .nav-link:hover,
+        .admin-sidebar .nav-link.active {
+            background: #34495e;
+            color: white;
+        }
+        
+        .admin-content {
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 30px;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stats-card .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .stats-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-hotel me-2"></i>
+                Paradise Resort & Spa
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">Giới thiệu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/rooms">Phòng nghỉ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/services">Dịch vụ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">Liên hệ</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <% if (typeof user !== 'undefined' && user) { %>
+                        <!-- User is logged in -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>
+                                <%= user.firstName || user.username %>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/profile">
+                                    <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                                </a></li>
+                                <% if (user.role === 'admin') { %>
+                                    <li><a class="dropdown-item" href="/admin">
+                                        <i class="fas fa-cog me-2"></i>Quản trị
+                                    </a></li>
+                                <% } %>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/auth/logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                </a></li>
+                            </ul>
+                        </li>
+                    <% } else { %>
+                        <!-- User is not logged in -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="/auth/login">
+                                <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ms-2" href="/auth/register">
+                                <i class="fas fa-user-plus me-1"></i>Đăng ký
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <%- include(content) %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Paradise Resort & Spa</h5>
+                    <p>Thiên đường nghỉ dưỡng tuyệt vời với dịch vụ 5 sao và view biển đẹp nhất.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Liên hệ</h5>
+                    <p><i class="fas fa-map-marker-alt me-2"></i>123 Beach Road, Nha Trang, Vietnam</p>
+                    <p><i class="fas fa-phone me-2"></i>+84 258 123 4567</p>
+                    <p><i class="fas fa-envelope me-2"></i>info@paradiseresort.com</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Theo dõi chúng tôi</h5>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p>&copy; 2024 Paradise Resort & Spa. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+</body>
+</html>

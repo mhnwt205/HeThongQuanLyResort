@@ -1,4 +1,4 @@
-const sql = require('mssql');
+const sql = require('mssql/msnodesqlv8');
 require('dotenv').config();
 
 const useIntegratedAuth = String(process.env.DB_INTEGRATED_AUTH || 'false').toLowerCase() === 'true';
@@ -6,10 +6,11 @@ const useIntegratedAuth = String(process.env.DB_INTEGRATED_AUTH || 'false').toLo
 const baseConfig = {
     database: process.env.DB_NAME || 'ResortManagement',
     server: process.env.DB_HOST || 'localhost',
-    port: Number(process.env.DB_PORT) || 1433,
     options: {
         encrypt: false,
-        trustServerCertificate: true
+        trustServerCertificate: true,
+        trustedConnection: true,
+        driver: 'msnodesqlv8'
     },
     pool: {
         max: 10,
@@ -18,14 +19,14 @@ const baseConfig = {
     }
 };
 
+// Only add port if specified and not using named instance
+if (process.env.DB_PORT && !process.env.DB_HOST.includes('\\')) {
+    baseConfig.port = Number(process.env.DB_PORT);
+}
+
 const sqlConfig = useIntegratedAuth
     ? {
-        ...baseConfig,
-        // Use Windows Authentication (Integrated Security)
-        options: {
-            ...baseConfig.options,
-            trustedConnection: true
-        }
+        ...baseConfig
     }
     : {
         ...baseConfig,
@@ -35,13 +36,29 @@ const sqlConfig = useIntegratedAuth
 
 let poolPromise;
 
+function buildConfigFromEnv() {
+    const connectionString = process.env.DB_CONNECTION_STRING;
+    if (connectionString) {
+        return {
+            connectionString,
+            options: {
+                encrypt: false,
+                trustServerCertificate: true,
+                driver: 'msnodesqlv8'
+            }
+        };
+    }
+    return sqlConfig;
+}
+
 const getPool = async () => {
     if (!poolPromise) {
-        poolPromise = sql.connect(sqlConfig).then(pool => {
+        const effectiveConfig = buildConfigFromEnv();
+        poolPromise = sql.connect(effectiveConfig).then(pool => {
             console.log('✅ SQL Server connected');
             return pool;
         }).catch(err => {
-            console.error('❌ SQL Server connection error:', err.message);
+            console.error('❌ SQL Server connection error:', err.message || err);
             poolPromise = undefined;
             throw err;
         });

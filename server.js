@@ -77,6 +77,24 @@ app.use('/api', apiRoutes);
 const authRoutes = require('./src/routes/authRoutes');
 app.use('/auth', authRoutes);
 
+// Room Routes
+const roomRoutes = require('./src/routes/roomRoutes');
+app.use('/rooms', roomRoutes);
+
+// Service Routes
+const serviceRoutes = require('./src/routes/serviceRoutes');
+app.use('/services', serviceRoutes);
+
+// Booking Routes
+const bookingRoutes = require('./src/routes/bookingRoutes');
+app.use('/booking', bookingRoutes);
+
+// Payment Routes (for MoMo callbacks)
+app.get('/payment/momo/qr', require('./src/controllers/bookingController').showMoMoQR);
+app.get('/payment/momo/mock', require('./src/controllers/bookingController').showMockMoMoPayment);
+app.get('/payment/momo/return', require('./src/controllers/bookingController').handleMoMoReturn);
+app.post('/payment/momo/notify', require('./src/controllers/bookingController').handleMoMoNotify);
+
 // Web Routes
 app.get('/', (req, res) => {
     res.render('customer/home', {
@@ -87,18 +105,6 @@ app.get('/', (req, res) => {
 app.get('/about', (req, res) => {
     res.render('customer/about', {
         title: 'Giới thiệu - Paradise Resort & Spa'
-    });
-});
-
-app.get('/rooms', (req, res) => {
-    res.render('customer/rooms', {
-        title: 'Phòng nghỉ - Paradise Resort & Spa'
-    });
-});
-
-app.get('/services', (req, res) => {
-    res.render('customer/services', {
-        title: 'Dịch vụ - Paradise Resort & Spa'
     });
 });
 

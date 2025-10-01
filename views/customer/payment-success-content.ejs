@@ -1,0 +1,59 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h4 class="mb-0"><i class="fas fa-check-circle me-2"></i>Thanh toán thành công!</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <div class="bg-success rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                            <i class="fas fa-check text-white fa-3x"></i>
+                        </div>
+                    </div>
+
+                    <h5 class="text-success mb-3">Đặt phòng và thanh toán thành công!</h5>
+                    
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-info-circle me-2"></i>Thông tin đặt phòng</h6>
+                        <div class="row">
+                            <div class="col-6"><strong>Mã đặt phòng:</strong></div>
+                            <div class="col-6"><%= bookingCode %></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6"><strong>Số tiền đã thanh toán:</strong></div>
+                            <div class="col-6 text-success"><strong><%= new Intl.NumberFormat('vi-VN').format(amount) %> VNĐ</strong></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6"><strong>Phương thức:</strong></div>
+                            <div class="col-6">MoMo Wallet</div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-bell me-2"></i>Thông báo quan trọng</h6>
+                        <ul class="text-start mb-0">
+                            <li>Chúng tôi sẽ liên hệ với bạn trong vòng 30 phút để xác nhận đặt phòng</li>
+                            <li>Vui lòng mang theo CMND/CCCD khi check-in</li>
+                            <li>Check-in từ 14:00, Check-out trước 12:00</li>
+                            <li>Lưu lại mã đặt phòng để tra cứu khi cần</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="/booking/detail/<%= bookingCode %>" class="btn btn-primary">
+                            <i class="fas fa-eye me-2"></i>Xem chi tiết đặt phòng
+                        </a>
+                        <a href="/booking/search" class="btn btn-outline-primary">
+                            <i class="fas fa-search me-2"></i>Tra cứu đặt phòng
+                        </a>
+                        <a href="/rooms" class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

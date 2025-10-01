@@ -1,7 +1,7 @@
 const { body, validationResult } = require('express-validator');
 
 /**
- * Middleware xử lý lỗi validation
+ * Middleware xử lý lỗi validation cho API
  */
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
@@ -11,6 +11,19 @@ const handleValidationErrors = (req, res, next) => {
       message: 'Validation failed',
       errors: errors.array()
     });
+  }
+  next();
+};
+
+/**
+ * Middleware xử lý lỗi validation cho Web routes
+ */
+const handleWebValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    // For web routes, we let the controller handle the error rendering
+    // This middleware just passes the errors to the next middleware
+    req.validationErrors = errors.array();
   }
   next();
 };
@@ -51,6 +64,7 @@ const validateCustomer = [
 
 module.exports = {
   handleValidationErrors,
+  handleWebValidationErrors,
   validateBooking,
   validatePayment,
   validateCustomer

@@ -121,6 +121,17 @@ class Customer {
     }
 
     /**
+     * Tìm khách hàng theo email
+     * @param {string} email - Email khách hàng
+     * @returns {Promise<Object>} Thông tin khách hàng
+     */
+    static async findByEmail(email) {
+        const sql = 'SELECT * FROM Customers WHERE Email = @p1';
+        const result = await query(sql, [email]);
+        return result[0] || null;
+    }
+
+    /**
      * Lấy lịch sử đặt phòng của khách hàng
      * @param {number} customerId - ID khách hàng
      * @returns {Promise<Array>} Lịch sử đặt phòng
@@ -136,6 +147,29 @@ class Customer {
             ORDER BY b.CreatedAt DESC
         `;
         return await query(sql, [customerId]);
+    }
+
+    /**
+     * Tạo mã khách hàng tự động
+     * @returns {Promise<string>} Mã khách hàng
+     */
+    static async generateCustomerCode() {
+        const today = new Date();
+        const year = today.getFullYear().toString().slice(-2);
+        const month = (today.getMonth() + 1).toString().padStart(2, '0');
+        const day = today.getDate().toString().padStart(2, '0');
+        
+        const prefix = `CUS${year}${month}${day}`;
+        
+        const sql = `
+            SELECT COUNT(*) as count FROM Customers 
+            WHERE CustomerCode LIKE @p1
+        `;
+        
+        const result = await query(sql, [`${prefix}%`]);
+        const count = result[0].count + 1;
+        
+        return `${prefix}${count.toString().padStart(4, '0')}`;
     }
 }
 

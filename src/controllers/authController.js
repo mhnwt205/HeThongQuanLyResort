@@ -36,13 +36,12 @@ class AuthController {
     // Xử lý đăng nhập
     static async login(req, res) {
         try {
-            // Validate input
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Dữ liệu không hợp lệ',
-                    errors: errors.array()
+            // Check for validation errors from middleware
+            if (req.validationErrors && req.validationErrors.length > 0) {
+                return res.render('auth/login', {
+                    title: 'Đăng nhập - Paradise Resort & Spa',
+                    errors: req.validationErrors,
+                    formData: req.body
                 });
             }
 
@@ -52,26 +51,29 @@ class AuthController {
             // Tìm user
             const user = await User.findByEmailOrUsername(identifier);
             if (!user) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Email/Username hoặc mật khẩu không đúng'
+                return res.render('auth/login', {
+                    title: 'Đăng nhập - Paradise Resort & Spa',
+                    errors: [{ msg: 'Email/Username hoặc mật khẩu không đúng' }],
+                    formData: req.body
                 });
             }
 
             // Kiểm tra role
             if (user.role !== role) {
-                return res.status(403).json({
-                    success: false,
-                    message: 'Bạn không có quyền truy cập với vai trò này'
+                return res.render('auth/login', {
+                    title: 'Đăng nhập - Paradise Resort & Spa',
+                    errors: [{ msg: 'Bạn không có quyền truy cập với vai trò này' }],
+                    formData: req.body
                 });
             }
 
             // Xác thực password
             const isValidPassword = await User.validatePassword(password, user.password);
             if (!isValidPassword) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Email/Username hoặc mật khẩu không đúng'
+                return res.render('auth/login', {
+                    title: 'Đăng nhập - Paradise Resort & Spa',
+                    errors: [{ msg: 'Email/Username hoặc mật khẩu không đúng' }],
+                    formData: req.body
                 });
             }
 
@@ -103,9 +105,10 @@ class AuthController {
 
         } catch (error) {
             console.error('Login error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Đã xảy ra lỗi khi đăng nhập'
+            return res.render('auth/login', {
+                title: 'Đăng nhập - Paradise Resort & Spa',
+                errors: [{ msg: 'Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.' }],
+                formData: req.body
             });
         }
     }
@@ -113,13 +116,12 @@ class AuthController {
     // Xử lý đăng ký
     static async register(req, res) {
         try {
-            // Validate input
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Dữ liệu không hợp lệ',
-                    errors: errors.array()
+            // Check for validation errors from middleware
+            if (req.validationErrors && req.validationErrors.length > 0) {
+                return res.render('auth/register', {
+                    title: 'Đăng ký - Paradise Resort & Spa',
+                    errors: req.validationErrors,
+                    formData: req.body
                 });
             }
 
@@ -139,26 +141,29 @@ class AuthController {
 
             // Kiểm tra password confirmation
             if (password !== confirmPassword) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Mật khẩu xác nhận không khớp'
+                return res.render('auth/register', {
+                    title: 'Đăng ký - Paradise Resort & Spa',
+                    errors: [{ msg: 'Mật khẩu xác nhận không khớp' }],
+                    formData: req.body
                 });
             }
 
             // Kiểm tra email/username đã tồn tại
             const emailExists = await User.exists(email);
             if (emailExists) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Email đã được sử dụng'
+                return res.render('auth/register', {
+                    title: 'Đăng ký - Paradise Resort & Spa',
+                    errors: [{ msg: 'Email đã được sử dụng' }],
+                    formData: req.body
                 });
             }
 
             const usernameExists = await User.exists(username);
             if (usernameExists) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Tên đăng nhập đã được sử dụng'
+                return res.render('auth/register', {
+                    title: 'Đăng ký - Paradise Resort & Spa',
+                    errors: [{ msg: 'Tên đăng nhập đã được sử dụng' }],
+                    formData: req.body
                 });
             }
 
@@ -178,24 +183,16 @@ class AuthController {
 
             const newUser = await User.create(userData);
 
-            // Tạo JWT token
-            const token = jwt.sign(
-                { 
-                    id: newUser.id, 
-                    username: newUser.username, 
-                    email: newUser.email, 
-                    role: newUser.role 
-                },
-                process.env.JWT_SECRET,
-                { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
-            );
-
             // Set session
             req.session.userId = newUser.id;
             req.session.userRole = newUser.role;
             req.session.username = newUser.username;
             req.session.firstName = newUser.firstName;
+            req.session.email = newUser.email;
             req.session.isLoggedIn = true;
+
+            // Set flash message
+            req.flash('success_msg', 'Đăng ký thành công! Chào mừng bạn đến với Paradise Resort & Spa.');
 
             // Redirect based on role
             if (role === 'admin') {
@@ -206,9 +203,10 @@ class AuthController {
 
         } catch (error) {
             console.error('Register error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Đã xảy ra lỗi khi đăng ký'
+            return res.render('auth/register', {
+                title: 'Đăng ký - Paradise Resort & Spa',
+                errors: [{ msg: 'Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.' }],
+                formData: req.body
             });
         }
     }

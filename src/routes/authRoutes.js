@@ -2,6 +2,7 @@ const express = require('express');
 const { body } = require('express-validator');
 const AuthController = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
+const { handleWebValidationErrors } = require('../middleware/validation');
 
 const router = express.Router();
 
@@ -50,10 +51,10 @@ router.get('/login', AuthController.showLogin);
 router.get('/register', AuthController.showRegister);
 
 // Xử lý đăng nhập
-router.post('/login', loginValidation, AuthController.login);
+router.post('/login', loginValidation, handleWebValidationErrors, AuthController.login);
 
 // Xử lý đăng ký
-router.post('/register', registerValidation, AuthController.register);
+router.post('/register', registerValidation, handleWebValidationErrors, AuthController.register);
 
 // Đăng xuất
 router.post('/logout', AuthController.logout);

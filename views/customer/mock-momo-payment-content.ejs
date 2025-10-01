@@ -1,0 +1,62 @@
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0"><i class="fas fa-mobile-alt me-2"></i>Thanh toán MoMo</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-mobile-alt text-white fa-2x"></i>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>Thông tin thanh toán</h6>
+                        <div class="row">
+                            <div class="col-6"><strong>Mã đặt phòng:</strong></div>
+                            <div class="col-6"><%= bookingCode %></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6"><strong>Số tiền:</strong></div>
+                            <div class="col-6 text-primary"><strong><%= new Intl.NumberFormat('vi-VN').format(amount) %> VNĐ</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Lưu ý</h6>
+                        <p class="mb-0">Đây là trang demo thanh toán MoMo. Trong thực tế, bạn sẽ được chuyển hướng đến ứng dụng MoMo để thanh toán.</p>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-lg" onclick="simulatePayment()">
+                            <i class="fas fa-check me-2"></i>Thanh toán thành công (Demo)
+                        </button>
+                        <button class="btn btn-danger" onclick="simulatePaymentFailure()">
+                            <i class="fas fa-times me-2"></i>Thanh toán thất bại (Demo)
+                        </button>
+                        <a href="/rooms" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function simulatePayment() {
+    // Simulate successful payment
+    const returnUrl = `/booking/payment/momo/return?resultCode=0&orderId=<%= bookingCode %>&amount=<%= amount %>&extraData={"bookingCode":"<%= bookingCode %>"}`;
+    window.location.href = returnUrl;
+}
+
+function simulatePaymentFailure() {
+    // Simulate failed payment
+    const returnUrl = `/booking/payment/momo/return?resultCode=1&orderId=<%= bookingCode %>&amount=<%= amount %>`;
+    window.location.href = returnUrl;
+}
+</script>
+

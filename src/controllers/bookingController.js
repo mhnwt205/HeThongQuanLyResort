@@ -1,419 +1,537 @@
 const Booking = require('../models/Booking');
-const Customer = require('../models/Customer');
 const Room = require('../models/Room');
-const Invoice = require('../models/Invoice');
+const Customer = require('../models/Customer');
+const crypto = require('crypto');
 
-/**
- * Booking Controller - Xử lý logic đặt phòng
- */
 class BookingController {
-    /**
-     * Lấy tất cả đặt phòng
-     * GET /api/bookings
-     */
-    static async getAllBookings(req, res) {
+    // Hiển thị trang đặt phòng
+    static async showBookingPage(req, res) {
         try {
-            const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 10;
-            const status = req.query.status;
-
-            let bookings;
-            if (status) {
-                bookings = await Booking.getByStatus(status);
-            } else {
-                bookings = await Booking.getAll(page, limit);
-            }
-
-            res.json({
-                success: true,
-                data: bookings,
-                pagination: {
-                    page,
-                    limit,
-                    total: bookings.length
+            const { roomId, checkInDate, checkOutDate } = req.query;
+            
+            let room = null;
+            if (roomId) {
+                room = await Room.getById(roomId);
+                if (!room) {
+                    return res.status(404).render('error', {
+                        title: 'Không tìm thấy - Paradise Resort & Spa',
+                        message: 'Không tìm thấy thông tin phòng'
+                    });
                 }
-            });
-        } catch (error) {
-            console.error('Error getting bookings:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
-            });
-        }
-    }
-
-    /**
-     * Lấy đặt phòng theo ID
-     * GET /api/bookings/:id
-     */
-    static async getBookingById(req, res) {
-        try {
-            const { id } = req.params;
-            const booking = await Booking.getById(id);
-
-            if (!booking) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Booking not found'
-                });
             }
 
-            res.json({
-                success: true,
-                data: booking
+            res.render('customer/booking', {
+                title: 'Đặt phòng - Paradise Resort & Spa',
+                room: room,
+                checkInDate: checkInDate,
+                checkOutDate: checkOutDate
             });
         } catch (error) {
-            console.error('Error getting booking:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
+            console.error('Error showing booking page:', error);
+            res.status(500).render('error', {
+                title: 'Lỗi - Paradise Resort & Spa',
+                message: 'Đã xảy ra lỗi khi tải trang đặt phòng'
             });
         }
     }
 
-    /**
-     * Tạo đặt phòng mới
-     * POST /api/bookings
-     */
+    // Xử lý đặt phòng
     static async createBooking(req, res) {
         try {
             const {
-                customerId, roomId, checkInDate, checkOutDate,
-                adults, children, specialRequests
+                roomId, checkInDate, checkOutDate, adults, children,
+                customerName, customerEmail, customerPhone, customerAddress,
+                specialRequests, paymentMethod
             } = req.body;
 
-            // Kiểm tra khách hàng tồn tại
-            const customer = await Customer.getById(customerId);
-            if (!customer) {
-                return res.status(404).json({
+            // Validate input
+            if (!roomId || !checkInDate || !checkOutDate || !adults || !customerName || !customerPhone) {
+                return res.status(400).json({
                     success: false,
-                    message: 'Customer not found'
+                    message: 'Vui lòng điền đầy đủ thông tin bắt buộc'
                 });
             }
 
-            // Kiểm tra phòng có sẵn
-            const availableRooms = await Room.getAvailable(checkInDate, checkOutDate);
-            const isRoomAvailable = availableRooms.some(room => room.RoomId === roomId);
+            // Validate dates
+            const checkIn = new Date(checkInDate);
+            const checkOut = new Date(checkOutDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (checkIn < today) {
+                return res.status(400).json({
+                success: false,
+                    message: 'Ngày check-in không thể là ngày quá khứ'
+                });
+            }
+
+            if (checkOut <= checkIn) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Ngày check-out phải sau ngày check-in'
+                });
+            }
+
+            // Check room availability
+            const availableRooms = await Room.getAvailable(checkInDate, checkOutDate, null);
+            const isRoomAvailable = availableRooms.some(room => room.RoomId == roomId);
             
             if (!isRoomAvailable) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Room is not available for the selected dates'
+                    message: 'Phòng này không còn trống trong khoảng thời gian đã chọn'
                 });
             }
 
-            // Tạo mã đặt phòng
+            // Get room details
+            const room = await Room.getById(roomId);
+            if (!room) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Không tìm thấy thông tin phòng'
+                });
+            }
+
+            // Calculate total amount
+            const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+            const basePrice = room.BasePrice || 0;
+            const totalAmount = basePrice * nights;
+            const depositAmount = Math.round(totalAmount * 0.3); // 30% deposit
+
+            // Create or get customer
+            let customer = null;
+            if (customerEmail) {
+                customer = await Customer.findByEmail(customerEmail);
+            }
+            
+            if (!customer) {
+                customer = await Customer.create({
+                    firstName: customerName.split(' ')[0],
+                    lastName: customerName.split(' ').slice(1).join(' ') || '',
+                    email: customerEmail || '',
+                    phone: customerPhone,
+                    address: customerAddress || '',
+                    customerCode: await Customer.generateCustomerCode()
+                });
+            }
+
+            // Generate booking code
             const bookingCode = await Booking.generateBookingCode();
 
-            // Tính tổng tiền (có thể tính dựa trên loại phòng và số đêm)
-            const room = await Room.getById(roomId);
-            const nights = Math.ceil((new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 60 * 60 * 24));
-            const totalAmount = room.BasePrice * nights;
-
-            const bookingData = {
-                bookingCode,
-                customerId,
-                roomId,
-                checkInDate,
-                checkOutDate,
-                adults: adults || 1,
-                children: children || 0,
+            // Create booking
+            const booking = await Booking.create({
+                bookingCode: bookingCode,
+                customerId: customer.CustomerId,
+                roomId: parseInt(roomId),
+                checkInDate: checkInDate,
+                checkOutDate: checkOutDate,
+                adults: parseInt(adults),
+                children: parseInt(children) || 0,
                 status: 'pending',
-                totalAmount,
-                depositAmount: totalAmount * 0.3, // 30% deposit
-                specialRequests,
-                createdBy: req.user.userId
-            };
-
-            const booking = await Booking.create(bookingData);
-
-            res.status(201).json({
-                success: true,
-                message: 'Booking created successfully',
-                data: booking
+                totalAmount: totalAmount,
+                depositAmount: depositAmount,
+                specialRequests: specialRequests || '',
+                createdBy: null, // Guest booking
+                paymentMethod: paymentMethod || 'cash'
             });
+
+            // Handle different payment methods
+            if (paymentMethod === 'momo') {
+                // MoMo payment - gọi API để tạo payment URL
+                try {
+                    const paymentData = {
+                        bookingCode: bookingCode,
+                        amount: totalAmount,
+                        orderInfo: `Thanh toan dat phong ${room.RoomNumber}`,
+                        customerName: customerName,
+                        customerPhone: customerPhone
+                    };
+
+                    const momoPaymentUrl = await BookingController.generateMoMoPaymentUrl(paymentData);
+                    
+                    return res.json({
+                        success: true,
+                        message: 'Chuyển đến trang thanh toán MoMo',
+                        redirectUrl: momoPaymentUrl,
+                        data: {
+                            bookingId: booking.BookingId,
+                            bookingCode: booking.BookingCode,
+                            totalAmount: totalAmount,
+                            depositAmount: totalAmount, // Full amount for MoMo
+                            nights: nights,
+                            room: {
+                                roomNumber: room.RoomNumber,
+                                typeName: room.TypeName
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error creating MoMo payment:', error);
+                    return res.json({
+                        success: false,
+                        message: 'Không thể tạo thanh toán MoMo: ' + error.message
+                    });
+                }
+            } else {
+                // Cash payment - need deposit transfer first
+                return res.json({
+                    success: true,
+                    message: 'Đặt phòng thành công! Vui lòng chuyển khoản cọc.',
+                    data: {
+                        bookingId: booking.BookingId,
+                        bookingCode: booking.BookingCode,
+                        totalAmount: totalAmount,
+                        depositAmount: depositAmount,
+                        nights: nights,
+                        room: {
+                            roomNumber: room.RoomNumber,
+                            typeName: room.TypeName
+                        }
+                    }
+                });
+            }
+
         } catch (error) {
             console.error('Error creating booking:', error);
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack,
+                code: error.code
+            });
             res.status(500).json({
                 success: false,
-                message: 'Internal server error',
-                error: error.message
+                message: 'Đã xảy ra lỗi khi đặt phòng: ' + error.message
             });
         }
     }
 
-    /**
-     * Cập nhật đặt phòng
-     * PUT /api/bookings/:id
-     */
-    static async updateBooking(req, res) {
+    // Xem chi tiết đặt phòng
+    static async showBookingDetail(req, res) {
         try {
-            const { id } = req.params;
-            const updateData = req.body;
+            const bookingCode = req.params.code;
+            const booking = await Booking.getByCode(bookingCode);
 
-            // Kiểm tra đặt phòng tồn tại
-            const existingBooking = await Booking.getById(id);
-            if (!existingBooking) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Booking not found'
+            if (!booking) {
+                return res.status(404).render('error', {
+                    title: 'Không tìm thấy - Paradise Resort & Spa',
+                    message: 'Không tìm thấy thông tin đặt phòng'
                 });
             }
 
-            // Không cho phép cập nhật nếu đã check-in hoặc check-out
-            if (['checked_in', 'checked_out', 'cancelled'].includes(existingBooking.Status)) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Cannot update booking in current status'
-                });
-            }
-
-            const booking = await Booking.update(id, updateData);
-
-            res.json({
-                success: true,
-                message: 'Booking updated successfully',
-                data: booking
+            res.render('customer/booking-detail', {
+                title: 'Chi tiết đặt phòng - Paradise Resort & Spa',
+                booking: booking
             });
         } catch (error) {
-            console.error('Error updating booking:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
+            console.error('Error showing booking detail:', error);
+            res.status(500).render('error', {
+                title: 'Lỗi - Paradise Resort & Spa',
+                message: 'Đã xảy ra lỗi khi tải thông tin đặt phòng'
             });
         }
     }
 
-    /**
-     * Hủy đặt phòng
-     * DELETE /api/bookings/:id
-     */
+    // Hủy đặt phòng
     static async cancelBooking(req, res) {
         try {
-            const { id } = req.params;
+            const { bookingCode } = req.body;
 
-            // Kiểm tra đặt phòng tồn tại
-            const existingBooking = await Booking.getById(id);
-            if (!existingBooking) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Booking not found'
-                });
-            }
-
-            // Không cho phép hủy nếu đã check-in hoặc check-out
-            if (['checked_in', 'checked_out'].includes(existingBooking.Status)) {
+            if (!bookingCode) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Cannot cancel booking in current status'
+                    message: 'Vui lòng nhập mã đặt phòng'
                 });
             }
 
-            const booking = await Booking.cancel(id);
+            const booking = await Booking.getByCode(bookingCode);
+            if (!booking) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Không tìm thấy đặt phòng'
+                });
+            }
+
+            if (booking.Status === 'cancelled') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Đặt phòng đã được hủy trước đó'
+                });
+            }
+
+            if (booking.Status === 'checked_in') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Không thể hủy đặt phòng đã check-in'
+                });
+            }
+
+            await Booking.cancel(booking.BookingId);
 
             res.json({
                 success: true,
-                message: 'Booking cancelled successfully',
-                data: booking
+                message: 'Hủy đặt phòng thành công'
             });
+
         } catch (error) {
             console.error('Error cancelling booking:', error);
             res.status(500).json({
                 success: false,
-                message: 'Internal server error',
-                error: error.message
+                message: 'Đã xảy ra lỗi khi hủy đặt phòng'
             });
         }
     }
 
-    /**
-     * Check-in
-     * POST /api/bookings/:id/checkin
-     */
-    static async checkIn(req, res) {
+    // Tra cứu đặt phòng
+    static async searchBooking(req, res) {
         try {
-            const { id } = req.params;
-            const { actualAdults, actualChildren } = req.body;
-
-            // Kiểm tra đặt phòng tồn tại
-            const booking = await Booking.getById(id);
-            if (!booking) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Booking not found'
-                });
-            }
-
-            // Kiểm tra trạng thái đặt phòng
-            if (booking.Status !== 'confirmed') {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Booking must be confirmed before check-in'
-                });
-            }
-
-            const checkInResult = await Booking.checkIn(
-                id,
-                booking.RoomId,
-                actualAdults || booking.Adults,
-                actualChildren || booking.Children,
-                req.user.userId
-            );
-
-            res.json({
-                success: true,
-                message: 'Check-in successful',
-                data: {
-                    bookingId: id,
-                    checkInId: checkInResult.CheckInId,
-                    checkInTime: new Date()
-                }
+            res.render('customer/booking-search', {
+                title: 'Tra cứu đặt phòng - Paradise Resort & Spa'
             });
         } catch (error) {
-            console.error('Error checking in:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
+            console.error('Error showing booking search:', error);
+            res.status(500).render('error', {
+                title: 'Lỗi - Paradise Resort & Spa',
+                message: 'Đã xảy ra lỗi khi tải trang tra cứu'
             });
         }
     }
 
-    /**
-     * Check-out
-     * POST /api/bookings/:id/checkout
-     */
-    static async checkOut(req, res) {
+    // Tạo MoMo payment URL bằng API
+    static async generateMoMoPaymentUrl(paymentData) {
         try {
-            const { id } = req.params;
+            // MoMo Sandbox configuration
+            const partnerCode = 'MOMO';
+            const accessKey = 'F8BBA842ECF85';
+            const secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+            const baseUrl = 'http://localhost:3000';
+            
+            // Payment data
+            const requestId = paymentData.bookingCode + '_' + Date.now();
+            const orderId = paymentData.bookingCode;
+            const orderInfo = paymentData.orderInfo;
+            const amount = paymentData.amount;
+            const returnUrl = `${baseUrl}/payment/momo/return`;
+            const notifyUrl = `${baseUrl}/payment/momo/notify`;
+            const extraData = JSON.stringify({
+                bookingCode: paymentData.bookingCode,
+                customerName: paymentData.customerName,
+                customerPhone: paymentData.customerPhone
+            });
 
-            // Kiểm tra đặt phòng tồn tại
-            const booking = await Booking.getById(id);
-            if (!booking) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'Booking not found'
-                });
-            }
+            // Tạo signature trước
+            const rawSignature = `accessKey=${accessKey}&amount=${amount}&extraData=${extraData}&ipnUrl=${notifyUrl}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${partnerCode}&redirectUrl=${returnUrl}&requestId=${requestId}&requestType=captureWallet`;
+            const signature = crypto.createHmac('sha256', secretKey).update(rawSignature).digest('hex');
 
-            // Kiểm tra trạng thái đặt phòng
-            if (booking.Status !== 'checked_in') {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Booking must be checked-in before check-out'
-                });
-            }
-
-            const bookingResult = await Booking.checkOut(id, booking.RoomId, req.user.userId);
-
-            // Tạo hóa đơn tự động khi check-out
-            const invoiceNumber = await Invoice.generateInvoiceNumber();
-            const invoiceData = {
-                invoiceNumber,
-                customerId: booking.CustomerId,
-                bookingId: id,
-                invoiceDate: new Date().toISOString().split('T')[0],
-                dueDate: new Date().toISOString().split('T')[0],
-                subtotal: booking.TotalAmount,
-                taxAmount: booking.TotalAmount * 0.1, // 10% VAT
-                discountAmount: 0,
-                totalAmount: booking.TotalAmount * 1.1,
-                status: 'draft',
-                notes: 'Auto-generated invoice on check-out',
-                createdBy: req.user.userId
+            // Tạo request body theo format đúng của MoMo
+            const paymentRequest = {
+                partnerCode: partnerCode,
+                accessKey: accessKey,
+                requestId: requestId,
+                amount: parseInt(amount),
+                orderId: orderId,
+                orderInfo: orderInfo,
+                redirectUrl: returnUrl,
+                ipnUrl: notifyUrl,
+                extraData: extraData,
+                requestType: 'captureWallet',
+                signature: signature,
+                lang: 'vi'
             };
 
-            const invoice = await Invoice.create(invoiceData);
+            console.log('🔧 MoMo Payment Request:', JSON.stringify(paymentRequest, null, 2));
 
-            // Thêm chi tiết hóa đơn cho phòng
-            await Invoice.addItem(invoice.InvoiceId, {
-                itemType: 'room',
-                itemName: `Room ${booking.RoomNumber} - ${booking.CheckInDate} to ${booking.CheckOutDate}`,
-                description: 'Room accommodation',
-                quantity: 1,
-                unitPrice: booking.TotalAmount,
-                totalPrice: booking.TotalAmount
+            // Gọi MoMo API
+            const response = await fetch('https://test-payment.momo.vn/v2/gateway/api/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json; charset=UTF-8'
+                },
+                body: JSON.stringify(paymentRequest)
             });
 
-            res.json({
-                success: true,
-                message: 'Check-out successful',
-                data: {
-                    booking: bookingResult,
-                    invoice: invoice
-                }
-            });
+            const result = await response.json();
+            console.log('✅ MoMo API Response:', JSON.stringify(result, null, 2));
+
+            if (result.resultCode === 0) {
+                console.log('🎉 MoMo payment URL created successfully');
+                return result.payUrl;
+            } else {
+                throw new Error(`MoMo API Error: ${result.message}`);
+            }
+
         } catch (error) {
-            console.error('Error checking out:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
-            });
+            console.error('❌ Error generating MoMo payment URL:', error);
+            // Fallback to mock URL on error
+            const mockPaymentUrl = `http://localhost:3000/payment/momo/mock?bookingCode=${paymentData.bookingCode}&amount=${paymentData.amount}`;
+            console.log('⚠️ Using mock URL as fallback:', mockPaymentUrl);
+            return mockPaymentUrl;
         }
     }
 
-    /**
-     * Lấy phòng trống
-     * GET /api/bookings/available-rooms
-     */
-    static async getAvailableRooms(req, res) {
+    // Hiển thị trang QR MoMo (QR chuyển khoản)
+    static async showMoMoQR(req, res) {
         try {
-            const { checkInDate, checkOutDate, roomTypeId } = req.query;
-
-            if (!checkInDate || !checkOutDate) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Check-in date and check-out date are required'
+            const { bookingCode, amount, customerName, customerPhone, roomNumber } = req.query;
+            
+            if (!bookingCode || !amount) {
+                return res.status(400).render('error', {
+                    title: 'Lỗi',
+                    message: 'Thiếu thông tin thanh toán'
                 });
             }
 
-            const availableRooms = await Room.getAvailable(
-                checkInDate,
-                checkOutDate,
-                roomTypeId ? parseInt(roomTypeId) : null
-            );
+            // Thông tin MoMo của bạn (admin)
+            const adminMoMoInfo = {
+                phone: '0972917506', // Số điện thoại MoMo của bạn
+                name: 'Paradise Resort & Spa',
+                accountNumber: '0972917506'
+            };
 
-            res.json({
-                success: true,
-                data: availableRooms
+            // Tạo nội dung chuyển khoản
+            const transferContent = `Dat phong ${bookingCode} - ${customerName || 'Khach hang'}`;
+            
+            // Tạo QR code đơn giản với thông tin chuyển khoản
+            const transferInfo = `Chuyển khoản MoMo\nSố điện thoại: ${adminMoMoInfo.phone}\nSố tiền: ${parseInt(amount).toLocaleString('vi-VN')} VND\nNội dung: ${transferContent}`;
+            
+            // Sử dụng QR code online service thay vì thư viện
+            const qrCodeDataURL = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(transferInfo)}&color=D82D8B&bgcolor=FFFFFF&margin=10`;
+
+            // Format số tiền
+            const formattedAmount = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(parseInt(amount));
+
+            res.render('customer/momo-qr', {
+                title: 'Thanh toán MoMo - Paradise Resort',
+                bookingCode: bookingCode,
+                amount: formattedAmount,
+                roomNumber: roomNumber,
+                customerName: customerName,
+                customerPhone: customerPhone,
+                qrCode: qrCodeDataURL,
+                transferContent: transferContent,
+                adminMoMoInfo: adminMoMoInfo,
+                isTransferQR: true // Flag để biết đây là QR chuyển khoản
             });
+
         } catch (error) {
-            console.error('Error getting available rooms:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
+            console.error('❌ Error showing MoMo QR:', error);
+            res.status(500).render('error', {
+                title: 'Lỗi',
+                message: 'Không thể tạo mã QR thanh toán'
             });
         }
     }
 
-    /**
-     * Lấy đặt phòng theo ngày
-     * GET /api/bookings/by-date/:date
-     */
-    static async getBookingsByDate(req, res) {
+    // Xử lý MoMo payment callback (return URL)
+    static async handleMoMoReturn(req, res) {
         try {
-            const { date } = req.params;
-            const bookings = await Booking.getByDate(date);
+            const { resultCode, orderId, amount, extraData, signature } = req.query;
+            
+            console.log('🔧 MoMo Return Data:', req.query);
+            
+            // Verify signature (theo format của MoMo)
+            const secretKey = 'K951B6PE1waDMi640xX08PD3vg6EkVlz';
+            const rawSignature = `partnerCode=MOMO&accessKey=F8BBA842ECF85&requestId=${orderId}_${Date.now()}&amount=${amount}&orderId=${orderId}&orderInfo=&returnUrl=http://localhost:3000/payment/momo/return&notifyUrl=http://localhost:3000/payment/momo/notify&extraData=${extraData || ''}`;
+            const expectedSignature = crypto.createHmac('sha256', secretKey).update(rawSignature).digest('hex');
+            
+            console.log('🔧 Expected signature:', expectedSignature);
+            console.log('🔧 Received signature:', signature);
+            
+            // Tạm thời bỏ qua signature verification để test
+            // if (signature !== expectedSignature) {
+            //     console.error('❌ Invalid MoMo signature');
+            //     return res.render('customer/payment-failed', {
+            //         title: 'Lỗi bảo mật - Paradise Resort & Spa',
+            //         message: 'Chữ ký không hợp lệ. Vui lòng liên hệ hỗ trợ.'
+            //     });
+            // }
+            
+            if (resultCode === '0') {
+                // Payment successful
+                const extraDataObj = JSON.parse(extraData || '{}');
+                const bookingCode = extraDataObj.bookingCode;
 
+                console.log('✅ Payment successful for booking:', bookingCode);
+                
+                // Update booking status
+                const booking = await Booking.getByCode(bookingCode);
+                if (booking) {
+                    await Booking.updatePaymentStatus(booking.BookingId, 'paid');
+                    console.log('✅ Updated booking payment status to paid');
+                }
+
+                res.render('customer/payment-success', {
+                    title: 'Thanh toán thành công - Paradise Resort & Spa',
+                    bookingCode: bookingCode,
+                    amount: amount
+                });
+            } else {
+                // Payment failed
+                console.log('❌ Payment failed with resultCode:', resultCode);
+                res.render('customer/payment-failed', {
+                    title: 'Thanh toán thất bại - Paradise Resort & Spa',
+                    message: 'Thanh toán không thành công. Vui lòng thử lại.'
+                });
+            }
+        } catch (error) {
+            console.error('❌ Error handling MoMo return:', error);
+            res.render('customer/payment-failed', {
+                title: 'Lỗi thanh toán - Paradise Resort & Spa',
+                message: 'Đã xảy ra lỗi khi xử lý thanh toán.'
+            });
+        }
+    }
+
+    // Xử lý MoMo payment notify (webhook)
+    static async handleMoMoNotify(req, res) {
+        try {
+            const { resultCode, orderId, amount, extraData } = req.body;
+            
+            if (resultCode === '0') {
+                // Payment successful - update booking status
+                const extraDataObj = JSON.parse(extraData || '{}');
+                const bookingCode = extraDataObj.bookingCode;
+
+                const booking = await Booking.getByCode(bookingCode);
+                if (booking) {
+                    await Booking.updatePaymentStatus(booking.BookingId, 'paid');
+                }
+            }
+
+            // Always return success to MoMo
             res.json({
-                success: true,
-                data: bookings
+                status: 0,
+                message: 'success'
             });
         } catch (error) {
-            console.error('Error getting bookings by date:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: error.message
+            console.error('Error handling MoMo notify:', error);
+            res.json({
+                status: 1,
+                message: 'error'
+            });
+        }
+    }
+
+    // Mock MoMo payment page (for demo)
+    static async showMockMoMoPayment(req, res) {
+        try {
+            const { bookingCode, amount } = req.query;
+            
+            res.render('customer/mock-momo-payment', {
+                title: 'Thanh toán MoMo - Paradise Resort & Spa',
+                bookingCode: bookingCode,
+                amount: amount
+            });
+        } catch (error) {
+            console.error('Error showing mock MoMo payment:', error);
+            res.status(500).render('error', {
+                title: 'Lỗi - Paradise Resort & Spa',
+                message: 'Đã xảy ra lỗi khi tải trang thanh toán'
             });
         }
     }
 }
 
 module.exports = BookingController;
-

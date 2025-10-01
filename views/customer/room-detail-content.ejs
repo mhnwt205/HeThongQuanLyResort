@@ -1,0 +1,614 @@
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Room Header -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="fas fa-bed me-2"></i><%= room.TypeName || 'Standard Room' %></h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary">Phòng số: <%= room.RoomNumber %></h5>
+                            <p class="text-muted">Tầng: <%= room.FloorNumber %></p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <span class="badge bg-success fs-6"><%= room.Status || 'Available' %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Images -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h5><i class="fas fa-images me-2"></i>Hình ảnh phòng</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <img src="/images/rooms/room-view.jpg" class="card-img-top" alt="View phòng" loading="lazy">
+                                <div class="card-body p-2">
+                                    <small class="text-muted">View phòng</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <img src="/images/rooms/bathroom.jpg" class="card-img-top" alt="Phòng tắm" loading="lazy">
+                                <div class="card-body p-2">
+                                    <small class="text-muted">Phòng tắm</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <img src="/images/rooms/amenities.png" class="card-img-top" alt="Tiện nghi phòng" loading="lazy">
+                                <div class="card-body p-2">
+                                    <small class="text-muted">Tiện nghi</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Details -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Chi tiết phòng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Loại phòng</h6>
+                            <p><strong><%= room.TypeName || 'Standard Room' %></strong></p>
+                            
+                            <h6 class="text-muted">Số phòng</h6>
+                            <p><strong><%= room.RoomNumber %></strong></p>
+                            
+                            <h6 class="text-muted">Tầng</h6>
+                            <p><strong><%= room.FloorNumber %></strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <% if (room.MaxOccupancy) { %>
+                                <h6 class="text-muted">Sức chứa tối đa</h6>
+                                <p><strong><%= room.MaxOccupancy %> khách</strong></p>
+                            <% } %>
+                            
+                            <h6 class="text-muted">Trạng thái</h6>
+                            <p><strong><%= room.Status || 'Available' %></strong></p>
+                            
+                            <% if (room.BasePrice) { %>
+                                <h6 class="text-muted">Giá/đêm</h6>
+                                <p><strong class="text-primary"><%= new Intl.NumberFormat('vi-VN').format(room.BasePrice) %> VNĐ</strong></p>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Amenities -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Tiện nghi</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-wifi text-success me-2"></i>WiFi miễn phí</li>
+                                <li><i class="fas fa-snowflake text-success me-2"></i>Điều hòa nhiệt độ</li>
+                                <li><i class="fas fa-tv text-success me-2"></i>Tivi màn hình phẳng</li>
+                                <li><i class="fas fa-phone text-success me-2"></i>Điện thoại</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-bath text-success me-2"></i>Phòng tắm riêng</li>
+                                <li><i class="fas fa-coffee text-success me-2"></i>Minibar</li>
+                                <li><i class="fas fa-lock text-success me-2"></i>Két an toàn</li>
+                                <li><i class="fas fa-umbrella text-success me-2"></i>Áo choàng tắm</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <% if (room.Amenities) { %>
+                        <hr>
+                        <h6>Tiện nghi đặc biệt:</h6>
+                        <p><%= room.Amenities %></p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <% if (room.Notes) { %>
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i>Ghi chú</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><%= room.Notes %></p>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Booking Card -->
+            <div class="card sticky-top" id="bookingCard">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Đặt phòng ngay</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Price Display -->
+                    <% if (room.BasePrice) { %>
+                        <div class="text-center mb-3">
+                            <h4 class="text-primary mb-1"><%= new Intl.NumberFormat('vi-VN').format(room.BasePrice) %> VNĐ</h4>
+                            <small class="text-muted">/đêm</small>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center mb-3">
+                            <h4 class="text-primary mb-1">Liên hệ giá</h4>
+                            <small class="text-muted">Giá theo yêu cầu</small>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Initial Buttons -->
+                    <div id="initialButtons" class="d-grid gap-2">
+                        <button class="btn btn-primary" onclick="showBookingForm()">
+                            <i class="fas fa-calendar-check me-2"></i>Đặt phòng ngay
+                        </button>
+                        <a href="/rooms/search?roomTypeId=<%= room.RoomTypeId %>" class="btn btn-outline-primary">
+                            <i class="fas fa-search me-2"></i>Tìm ngày trống
+                        </a>
+                        <a href="/rooms" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Xem phòng khác
+                        </a>
+                    </div>
+
+                    <!-- Booking Form (Hidden Initially) -->
+                    <div id="bookingForm" style="display: none;">
+                        <form id="roomBookingForm">
+                            <input type="hidden" id="roomId" value="<%= room.RoomId %>">
+                            
+                            <div class="mb-3">
+                                <label for="checkInDate" class="form-label">Ngày check-in *</label>
+                                <input type="date" class="form-control" id="checkInDate" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="checkOutDate" class="form-label">Ngày check-out *</label>
+                                <input type="date" class="form-control" id="checkOutDate" required>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="adults" class="form-label">Người lớn *</label>
+                                        <select class="form-select" id="adults" required>
+                                            <option value="">Chọn</option>
+                                            <% for (let i = 1; i <= (room.MaxOccupancy || 4); i++) { %>
+                                                <option value="<%= i %>" <%= i === 2 ? 'selected' : '' %>><%= i %></option>
+                                            <% } %>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="children" class="form-label">Trẻ em</label>
+                                        <select class="form-select" id="children">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6 class="text-primary"><i class="fas fa-user me-2"></i>Thông tin khách hàng</h6>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label for="customerName" class="form-label">Họ và tên *</label>
+                                        <input type="text" class="form-control" id="customerName" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="customerEmail" class="form-label">Email *</label>
+                                        <input type="email" class="form-control" id="customerEmail" required>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mb-3">
+                                        <label for="customerPhone" class="form-label">Số điện thoại *</label>
+                                        <input type="tel" class="form-control" id="customerPhone" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="customerAddress" class="form-label">Địa chỉ</label>
+                                <input type="text" class="form-control" id="customerAddress" placeholder="Tùy chọn">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="specialRequests" class="form-label">Yêu cầu đặc biệt</label>
+                                <textarea class="form-control" id="specialRequests" rows="2" 
+                                          placeholder="Ghi chú đặc biệt (tùy chọn)..."></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Phương thức thanh toán *</label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCash" value="cash" checked>
+                                            <label class="form-check-label" for="paymentCash">
+                                                <i class="fas fa-money-bill-wave text-success me-1"></i>
+                                                <div>Tiền mặt</div>
+                                                <small class="text-muted">Cọc 30% chuyển khoản, còn lại tiền mặt</small>
+                                            </label>
+                                        </div>
+                                        <div class="alert alert-warning small mt-1">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            <small>Bạn cần chuyển khoản cọc 30% trước</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentMomo" value="momo">
+                                            <label class="form-check-label" for="paymentMomo">
+                                                <i class="fas fa-mobile-alt text-primary me-1"></i>
+                                                <div>MoMo</div>
+                                                <small class="text-muted">Thanh toán 100% qua MoMo</small>
+                                            </label>
+                                        </div>
+                                        <div class="alert alert-info small mt-1">
+                                            <i class="fas fa-mobile-alt me-1"></i>
+                                            <small>Thanh toán toàn bộ qua ví MoMo</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Booking Summary -->
+                            <div id="bookingSummary" class="alert alert-info mb-3" style="display: none;">
+                                <h6>Tóm tắt đặt phòng:</h6>
+                                <div id="summaryContent"></div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check me-2"></i>Xác nhận đặt phòng
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="hideBookingForm()">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Policies -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-info-circle me-2"></i>Chính sách phòng</h5>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-check text-success me-2"></i>Check-in: 14:00</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Check-out: 12:00</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Miễn phí WiFi</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Không hút thuốc</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Không nuôi thú cưng</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-headset me-2"></i>Hỗ trợ</h5>
+                    <p class="mb-1"><strong>Hotline:</strong> 1900 1234</p>
+                    <p class="mb-1"><strong>Email:</strong> booking@paradise-resort.com</p>
+                    <p class="mb-0"><strong>Thời gian:</strong> 24/7</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('checkInDate').min = today;
+    document.getElementById('checkOutDate').min = today;
+
+    // Handle check-in date change
+    document.getElementById('checkInDate').addEventListener('change', function() {
+        const checkInDate = this.value;
+        const checkOutInput = document.getElementById('checkOutDate');
+        
+        if (checkInDate) {
+            const nextDay = new Date(checkInDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            checkOutInput.min = nextDay.toISOString().split('T')[0];
+            
+            if (checkOutInput.value && checkOutInput.value <= checkInDate) {
+                checkOutInput.value = '';
+            }
+        }
+        updateBookingSummary();
+    });
+
+    // Handle form changes for summary update
+    ['checkInDate', 'checkOutDate', 'adults', 'children'].forEach(id => {
+        document.getElementById(id).addEventListener('change', updateBookingSummary);
+    });
+
+    // Handle adults change to validate against room capacity
+    document.getElementById('adults').addEventListener('change', function() {
+        const maxOccupancy = <%= room.MaxOccupancy || 4 %>;
+        const adults = parseInt(this.value);
+        const children = parseInt(document.getElementById('children').value);
+        
+        if (adults + children > maxOccupancy) {
+            alert(`Phòng này chỉ có thể chứa tối đa ${maxOccupancy} người. Vui lòng giảm số người.`);
+            document.getElementById('children').value = Math.max(0, maxOccupancy - adults);
+        }
+    });
+
+    // Handle children change to validate against room capacity
+    document.getElementById('children').addEventListener('change', function() {
+        const maxOccupancy = <%= room.MaxOccupancy || 4 %>;
+        const adults = parseInt(document.getElementById('adults').value);
+        const children = parseInt(this.value);
+        
+        if (adults + children > maxOccupancy) {
+            alert(`Phòng này chỉ có thể chứa tối đa ${maxOccupancy} người. Vui lòng giảm số người.`);
+            this.value = Math.max(0, maxOccupancy - adults);
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('roomBookingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+        
+        const formData = {
+            roomId: document.getElementById('roomId').value,
+            checkInDate: document.getElementById('checkInDate').value,
+            checkOutDate: document.getElementById('checkOutDate').value,
+            adults: document.getElementById('adults').value,
+            children: document.getElementById('children').value,
+            customerName: document.getElementById('customerName').value,
+            customerEmail: document.getElementById('customerEmail').value,
+            customerPhone: document.getElementById('customerPhone').value,
+            customerAddress: document.getElementById('customerAddress').value,
+            specialRequests: document.getElementById('specialRequests').value,
+            paymentMethod: paymentMethod
+        };
+
+        // Show loading
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+        submitBtn.disabled = true;
+
+        // Make API call
+        fetch('/booking/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                if (paymentMethod === 'cash') {
+                    showCashSuccessMessage(data.data);
+                    // Don't call hideBookingForm() because showCashSuccessMessage() replaces the entire card
+                } else if (paymentMethod === 'momo') {
+                    // Redirect to MoMo QR page
+                    window.location.href = data.redirectUrl;
+                }
+            } else {
+                alert('Lỗi: ' + data.message);
+                // Restore button on validation error
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi khi đặt phòng: ' + error.message);
+            // Restore button only on error
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+});
+
+function showBookingForm() {
+    document.getElementById('initialButtons').style.display = 'none';
+    document.getElementById('bookingForm').style.display = 'block';
+    document.getElementById('bookingCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideBookingForm() {
+    document.getElementById('bookingForm').style.display = 'none';
+    document.getElementById('initialButtons').style.display = 'block';
+    document.getElementById('bookingSummary').style.display = 'none';
+}
+
+function updateBookingSummary() {
+    const checkInDate = document.getElementById('checkInDate').value;
+    const checkOutDate = document.getElementById('checkOutDate').value;
+    const adults = document.getElementById('adults').value;
+    const children = document.getElementById('children').value;
+
+    if (!checkInDate || !checkOutDate || !adults) {
+        document.getElementById('bookingSummary').style.display = 'none';
+        return;
+    }
+
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
+    const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+
+    let html = `
+        <div class="row">
+            <div class="col-6">Số đêm:</div>
+            <div class="col-6 text-end"><strong>${nights} đêm</strong></div>
+        </div>
+        <div class="row">
+            <div class="col-6">Người lớn:</div>
+            <div class="col-6 text-end"><strong>${adults} người</strong></div>
+        </div>
+    `;
+
+    if (children && children !== '0') {
+        html += `
+            <div class="row">
+                <div class="col-6">Trẻ em:</div>
+                <div class="col-6 text-end"><strong>${children} trẻ em</strong></div>
+            </div>
+        `;
+    }
+
+    <% if (typeof room !== 'undefined' && room && room.BasePrice) { %>
+        const basePrice = <%= room.BasePrice %>;
+        const totalAmount = basePrice * nights;
+        const depositAmount = Math.round(totalAmount * 0.3);
+
+        html += `
+            <hr>
+            <div class="row">
+                <div class="col-6">Giá/đêm:</div>
+                <div class="col-6 text-end"><strong>${new Intl.NumberFormat('vi-VN').format(basePrice)} VNĐ</strong></div>
+            </div>
+            <div class="row">
+                <div class="col-6">Tổng tiền:</div>
+                <div class="col-6 text-end"><strong>${new Intl.NumberFormat('vi-VN').format(totalAmount)} VNĐ</strong></div>
+            </div>
+            <div class="row">
+                <div class="col-6">Cọc (30%):</div>
+                <div class="col-6 text-end"><strong class="text-primary">${new Intl.NumberFormat('vi-VN').format(depositAmount)} VNĐ</strong></div>
+            </div>
+        `;
+    <% } %>
+
+    document.getElementById('summaryContent').innerHTML = html;
+    document.getElementById('bookingSummary').style.display = 'block';
+}
+
+function showCashSuccessMessage(data) {
+    const remainingAmount = data.totalAmount - data.depositAmount;
+    
+    const content = `
+        <div class="alert alert-success">
+            <h5><i class="fas fa-check-circle me-2"></i>Đặt phòng thành công!</h5>
+            <p><strong>Mã đặt phòng:</strong> ${data.bookingCode}</p>
+            <p><strong>Phòng:</strong> ${data.room.roomNumber} - ${data.room.typeName}</p>
+            <p><strong>Số đêm:</strong> ${data.nights} đêm</p>
+            <hr>
+            <h6><i class="fas fa-money-check-alt text-primary me-2"></i>Thông tin thanh toán:</h6>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <tr>
+                        <td>Tổng tiền:</td>
+                        <td class="text-end"><strong>${new Intl.NumberFormat('vi-VN').format(data.totalAmount)} VNĐ</strong></td>
+                    </tr>
+                    <tr class="table-warning">
+                        <td><i class="fas fa-exclamation-triangle text-warning me-1"></i>Tiền cọc (30%):</td>
+                        <td class="text-end"><strong>${new Intl.NumberFormat('vi-VN').format(data.depositAmount)} VNĐ</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Còn lại (tiền mặt khi nhận phòng):</td>
+                        <td class="text-end"><strong>${new Intl.NumberFormat('vi-VN').format(remainingAmount)} VNĐ</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="alert alert-warning">
+            <h6><i class="fas fa-university me-2"></i>Chuyển khoản cọc ngay để xác nhận đặt phòng:</h6>
+            <div class="card mb-2">
+                <div class="card-body p-2">
+                    <div class="row">
+                        <div class="col-6"><small>Ngân hàng:</small></div>
+                        <div class="col-6 text-end"><strong>Vietcombank</strong></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6"><small>Số tài khoản:</small></div>
+                        <div class="col-6 text-end"><strong>1234567890</strong></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6"><small>Chủ tài khoản:</small></div>
+                        <div class="col-6 text-end"><strong>PARADISE RESORT & SPA</strong></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6"><small>Số tiền:</small></div>
+                        <div class="col-6 text-end"><strong class="text-danger">${new Intl.NumberFormat('vi-VN').format(data.depositAmount)} VNĐ</strong></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6"><small>Nội dung CK:</small></div>
+                        <div class="col-6 text-end"><strong>${data.bookingCode}</strong></div>
+                    </div>
+                </div>
+            </div>
+            <p class="mb-0 small text-danger"><i class="fas fa-exclamation-circle me-1"></i>Vui lòng chuyển khoản trong vòng 24h để giữ phòng!</p>
+        </div>
+        
+        <div class="alert alert-info">
+            <h6><i class="fas fa-info-circle me-2"></i>Lưu ý quan trọng:</h6>
+            <ul class="mb-0 small">
+                <li>Sau khi chuyển khoản, vui lòng chụp ảnh bill và gửi về email: booking@paradise-resort.com</li>
+                <li>Hoặc nhắn tin Zalo/Hotline: <strong>1900 1234</strong> kèm mã đặt phòng <strong>${data.bookingCode}</strong></li>
+                <li>Số tiền còn lại <strong>${new Intl.NumberFormat('vi-VN').format(remainingAmount)} VNĐ</strong> thanh toán bằng tiền mặt khi check-in</li>
+                <li>Mang theo CMND/CCCD để xác minh thông tin</li>
+                <li>Check-in từ 14:00, Check-out trước 12:00</li>
+            </ul>
+        </div>
+    `;
+
+    document.getElementById('bookingCard').innerHTML = content;
+    
+    // Auto scroll to show success message
+    document.getElementById('bookingCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function showSuccessMessage(data) {
+    const content = `
+        <div class="alert alert-success">
+            <h5><i class="fas fa-check-circle me-2"></i>Đặt phòng thành công!</h5>
+            <p><strong>Mã đặt phòng:</strong> ${data.bookingCode}</p>
+            <p><strong>Phòng:</strong> ${data.room.roomNumber} - ${data.room.typeName}</p>
+            <p><strong>Số đêm:</strong> ${data.nights} đêm</p>
+            <p><strong>Tổng tiền:</strong> ${new Intl.NumberFormat('vi-VN').format(data.totalAmount)} VNĐ</p>
+            <p><strong>Cọc:</strong> ${new Intl.NumberFormat('vi-VN').format(data.depositAmount)} VNĐ</p>
+            <hr>
+            <p class="mb-0">Chúng tôi sẽ liên hệ với bạn trong vòng 30 phút để xác nhận đặt phòng.</p>
+        </div>
+    `;
+
+    document.getElementById('bookingCard').innerHTML = content;
+    
+    // Auto scroll to show success message
+    document.getElementById('bookingCard').scrollIntoView({ behavior: 'smooth' });
+}
+</script>

@@ -1,0 +1,190 @@
+<%- include('../layout', { title: service.name + ' - Paradise Resort & Spa' }) %>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Service Header -->
+            <div class="mb-4">
+                <i class="<%= service.icon %> fa-2x text-primary mb-3"></i>
+                <h1 class="display-5 fw-bold"><%= service.name %></h1>
+                <p class="lead"><%= service.description %></p>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary fs-6 me-3"><%= service.price %></span>
+                </div>
+            </div>
+
+            <!-- Service Details -->
+            <div class="mb-5">
+                <h3>Chi tiết dịch vụ</h3>
+                <p><%= service.details || service.description %></p>
+            </div>
+
+            <!-- Features -->
+            <% if (typeof service.features !== 'undefined' && service.features.length > 0) { %>
+                <div class="mb-5">
+                    <h3>Tiện ích</h3>
+                    <div class="row">
+                        <% service.features.forEach(function(feature) { %>
+                            <div class="col-md-6 mb-2">
+                                <i class="fas fa-check text-success me-2"></i><%= feature %>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Packages -->
+            <% if (typeof service.packages !== 'undefined' && service.packages.length > 0) { %>
+                <div class="mb-5">
+                    <h3>Gói dịch vụ</h3>
+                    <div class="row g-3">
+                        <% service.packages.forEach(function(pkg) { %>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><%= pkg.name %></h5>
+                                        <p class="card-text">
+                                            <i class="fas fa-clock me-2"></i><%= pkg.duration %>
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="h5 text-primary mb-0"><%= pkg.price %></span>
+                                            <button class="btn btn-primary" onclick="bookService(<%= service.id %>, '<%= pkg.name %>')">
+                                                Đặt ngay
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Booking Card -->
+            <div class="card sticky-top">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Đặt dịch vụ</h5>
+                </div>
+                <div class="card-body">
+                    <form id="bookingForm">
+                        <div class="mb-3">
+                            <label for="bookingDate" class="form-label">Ngày đặt</label>
+                            <input type="date" class="form-control" id="bookingDate" name="bookingDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="timeSlot" class="form-label">Giờ</label>
+                            <select class="form-select" id="timeSlot" name="timeSlot" required>
+                                <option value="">Chọn giờ</option>
+                                <option value="09:00">09:00</option>
+                                <option value="10:00">10:00</option>
+                                <option value="11:00">11:00</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                                <option value="18:00">18:00</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerName" class="form-label">Họ tên *</label>
+                            <input type="text" class="form-control" id="customerName" name="customerName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerPhone" class="form-label">Số điện thoại *</label>
+                            <input type="tel" class="form-control" id="customerPhone" name="customerPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="customerEmail" name="customerEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Ghi chú</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Đặt dịch vụ
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-phone me-2"></i>Liên hệ</h5>
+                    <p class="mb-1"><strong>Hotline:</strong> 1900 1234</p>
+                    <p class="mb-1"><strong>Email:</strong> services@paradise-resort.com</p>
+                    <p class="mb-0"><strong>Giờ hoạt động:</strong> 06:00 - 22:00</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('bookingDate').min = today;
+
+    // Handle form submission
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const bookingData = {
+            serviceId: <%= service.id %>,
+            bookingDate: formData.get('bookingDate'),
+            timeSlot: formData.get('timeSlot'),
+            customerName: formData.get('customerName'),
+            customerPhone: formData.get('customerPhone'),
+            customerEmail: formData.get('customerEmail'),
+            notes: formData.get('notes')
+        };
+
+        // Show loading
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+        submitBtn.disabled = true;
+
+        // Make API call
+        fetch('/services/book', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bookingData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đặt dịch vụ thành công! Chúng tôi sẽ liên hệ lại để xác nhận.');
+                this.reset();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi khi đặt dịch vụ');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+});
+
+// Book service function for package buttons
+function bookService(serviceId, packageName) {
+    const form = document.getElementById('bookingForm');
+    const notesField = form.querySelector('#notes');
+    notesField.value = 'Gói dịch vụ: ' + packageName;
+    form.scrollIntoView({ behavior: 'smooth' });
+    form.querySelector('#customerName').focus();
+}
+</script>
+

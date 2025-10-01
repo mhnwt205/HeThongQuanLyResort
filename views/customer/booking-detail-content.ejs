@@ -1,0 +1,283 @@
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Booking Info -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Chi tiết đặt phòng</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Mã đặt phòng</h6>
+                            <p class="h5"><strong><%= booking.BookingCode %></strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Trạng thái</h6>
+                            <span class="badge fs-6 <%= 
+                                booking.Status === 'confirmed' ? 'bg-success' : 
+                                booking.Status === 'pending' ? 'bg-warning' : 
+                                booking.Status === 'cancelled' ? 'bg-danger' : 
+                                booking.Status === 'checked_in' ? 'bg-info' : 'bg-secondary'
+                            %>">
+                                <%= 
+                                    booking.Status === 'confirmed' ? 'Đã xác nhận' : 
+                                    booking.Status === 'pending' ? 'Chờ xác nhận' : 
+                                    booking.Status === 'cancelled' ? 'Đã hủy' : 
+                                    booking.Status === 'checked_in' ? 'Đã check-in' : 
+                                    booking.Status === 'checked_out' ? 'Đã check-out' : booking.Status
+                                %>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Room Info -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bed me-2"></i>Thông tin phòng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Loại phòng</h6>
+                            <p class="h6"><strong><%= booking.TypeName || 'Standard Room' %></strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Số phòng</h6>
+                            <p class="h6"><strong><%= booking.RoomNumber %></strong></p>
+                        </div>
+                    </div>
+                    <% if (booking.MaxOccupancy) { %>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Sức chứa tối đa</h6>
+                                <p><%= booking.MaxOccupancy %> khách</p>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Dates & Guests -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Ngày lưu trú & Số khách</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Check-in</h6>
+                            <p><strong><%= new Date(booking.CheckInDate).toLocaleDateString('vi-VN') %></strong></p>
+                            <small class="text-muted">14:00</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Check-out</h6>
+                            <p><strong><%= new Date(booking.CheckOutDate).toLocaleDateString('vi-VN') %></strong></p>
+                            <small class="text-muted">12:00</small>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Người lớn</h6>
+                            <p><strong><%= booking.Adults %> người</strong></p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6 class="text-muted">Trẻ em</h6>
+                            <p><strong><%= booking.Children || 0 %> trẻ em</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Thông tin khách hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Họ và tên</h6>
+                            <p><strong><%= booking.FirstName %> <%= booking.LastName %></strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Email</h6>
+                            <p><%= booking.Email %></p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">Số điện thoại</h6>
+                            <p><%= booking.Phone %></p>
+                        </div>
+                        <% if (booking.CustomerCode) { %>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Mã khách hàng</h6>
+                                <p><%= booking.CustomerCode %></p>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Special Requests -->
+            <% if (booking.SpecialRequests) { %>
+                <div class="card shadow mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-comment me-2"></i>Yêu cầu đặc biệt</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><%= booking.SpecialRequests %></p>
+                    </div>
+                </div>
+            <% } %>
+
+            <!-- Actions -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5><i class="fas fa-cog me-2"></i>Thao tác</h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <% if (booking.Status === 'pending' || booking.Status === 'confirmed') { %>
+                            <button class="btn btn-danger" onclick="cancelBooking('<%= booking.BookingCode %>')">
+                                <i class="fas fa-times me-2"></i>Hủy đặt phòng
+                            </button>
+                        <% } %>
+                        <a href="/rooms/search" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Đặt phòng khác
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>In thông tin
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Payment Summary -->
+            <div class="card sticky-top">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Tóm tắt thanh toán</h5>
+                </div>
+                <div class="card-body">
+                    <% 
+                        const checkIn = new Date(booking.CheckInDate);
+                        const checkOut = new Date(booking.CheckOutDate);
+                        const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+                        const basePrice = booking.BasePrice || 0;
+                        const totalAmount = basePrice * nights;
+                        const depositAmount = booking.DepositAmount || Math.round(totalAmount * 0.3);
+                    %>
+                    
+                    <div class="row mb-2">
+                        <div class="col-6">Số đêm:</div>
+                        <div class="col-6 text-end"><strong><%= nights %> đêm</strong></div>
+                    </div>
+                    
+                    <% if (basePrice > 0) { %>
+                        <div class="row mb-2">
+                            <div class="col-6">Giá/đêm:</div>
+                            <div class="col-6 text-end"><strong><%= new Intl.NumberFormat('vi-VN').format(basePrice) %> VNĐ</strong></div>
+                        </div>
+                    <% } %>
+                    
+                    <div class="row mb-2">
+                        <div class="col-6">Tổng tiền:</div>
+                        <div class="col-6 text-end"><strong><%= new Intl.NumberFormat('vi-VN').format(totalAmount) %> VNĐ</strong></div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-6">Đã cọc:</div>
+                        <div class="col-6 text-end"><strong class="text-success"><%= new Intl.NumberFormat('vi-VN').format(depositAmount) %> VNĐ</strong></div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-6">Còn lại:</div>
+                        <div class="col-6 text-end"><strong class="text-primary"><%= new Intl.NumberFormat('vi-VN').format(totalAmount - depositAmount) %> VNĐ</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-headset me-2"></i>Hỗ trợ</h5>
+                    <p class="mb-1"><strong>Hotline:</strong> 1900 1234</p>
+                    <p class="mb-1"><strong>Email:</strong> booking@paradise-resort.com</p>
+                    <p class="mb-0"><strong>Thời gian:</strong> 24/7</p>
+                </div>
+            </div>
+
+            <!-- Important Notes -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-info-circle me-2"></i>Lưu ý quan trọng</h5>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-check text-success me-2"></i>Mang theo CMND/CCCD khi check-in</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Check-in: 14:00 - 22:00</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Check-out: 07:00 - 12:00</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Hủy miễn phí 24h trước</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Booking Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Xác nhận hủy đặt phòng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn hủy đặt phòng này?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Nếu hủy trong vòng 24h trước ngày check-in, bạn sẽ được hoàn 100% tiền cọc.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmCancelBtn">Xác nhận hủy</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function cancelBooking(bookingCode) {
+    const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+    modal.show();
+    
+    document.getElementById('confirmCancelBtn').onclick = function() {
+        fetch('/booking/cancel', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingCode: bookingCode })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Hủy đặt phòng thành công!');
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi khi hủy đặt phòng');
+        });
+        
+        modal.hide();
+    };
+}
+</script>
+

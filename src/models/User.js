@@ -25,8 +25,8 @@ class User {
                 .input('role', userData.role || 'customer')
                 .input('isActive', true)
                 .query(`
-                    INSERT INTO Users (Username, email, password, firstName, lastName, phone, address, dateOfBirth, gender, role, IsActive, CreatedAt)
-                    OUTPUT INSERTED.UserId, INSERTED.Username, INSERTED.email, INSERTED.firstName, INSERTED.lastName, INSERTED.role
+                    INSERT INTO Users (Username, email, PasswordHash, firstName, lastName, phone, address, dateOfBirth, gender, role, IsActive, CreatedAt)
+                    OUTPUT INSERTED.UserId as id, INSERTED.Username as username, INSERTED.email as email, INSERTED.firstName as firstName, INSERTED.lastName as lastName, INSERTED.role as role
                     VALUES (@username, @email, @password, @firstName, @lastName, @phone, @address, @dateOfBirth, @gender, @role, @isActive, GETDATE())
                 `);
             
@@ -46,7 +46,7 @@ class User {
             const result = await request
                 .input('identifier', identifier)
                 .query(`
-                    SELECT UserId as id, Username as username, email, password, firstName, lastName, phone, address, dateOfBirth, gender, role, IsActive as isActive, CreatedAt as createdAt
+                    SELECT UserId as id, Username as username, email, PasswordHash as password, firstName, lastName, phone, address, dateOfBirth, gender, role, IsActive as isActive, CreatedAt as createdAt
                     FROM Users 
                     WHERE (email = @identifier OR Username = @identifier) AND IsActive = 1
                 `);
@@ -150,7 +150,7 @@ class User {
             await request
                 .input('id', id)
                 .input('password', hashedPassword)
-                .query('UPDATE Users SET password = @password, UpdatedAt = GETDATE() WHERE UserId = @id');
+                .query('UPDATE Users SET PasswordHash = @password, UpdatedAt = GETDATE() WHERE UserId = @id');
             
             return true;
         } catch (error) {

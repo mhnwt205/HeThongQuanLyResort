@@ -5,9 +5,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "setup": "node scripts/setup.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db:setup": "sqlcmd -S localhost -U sa -P yourStrong(!)Password -i database/migration_fixed.sql",
-    "db:reset": "sqlcmd -S localhost -U sa -P yourStrong(!)Password -Q \"DROP DATABASE IF EXISTS ResortManagement; CREATE DATABASE ResortManagement;\" && npm run db:setup"
+    "db:setup": "sqlcmd -S localhost -U testuser -P 123456 -i database/migration_fixed.sql",
+    "db:reset": "sqlcmd -S localhost -U testuser -P 123456 -Q \"DROP DATABASE IF EXISTS ResortManagement; CREATE DATABASE ResortManagement;\" && npm run db:setup"
   },
   "keywords": ["resort", "management", "hotel", "booking", "spa", "sqlserver"],
   "author": "Resort Management Team",

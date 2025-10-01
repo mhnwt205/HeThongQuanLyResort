@@ -10,67 +10,132 @@
     </div>
 </section>
 
+<!-- Filter Section -->
+<section class="py-3 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="mb-0">Tìm kiếm phòng phù hợp</h5>
+                <small class="text-muted">Chọn ngày và số khách để tìm phòng trống</small>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="/rooms/search" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Tìm kiếm phòng
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Rooms Section -->
 <section class="py-5">
     <div class="container">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Deluxe Ocean View</h5>
-                        <p class="card-text">Phòng deluxe với view biển tuyệt đẹp, diện tích 45m², đầy đủ tiện nghi hiện đại.</p>
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-check text-success me-2"></i>View biển 180°</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Diện tích 45m²</li>
-                            <li><i class="fas fa-check text-success me-2"></i>WiFi miễn phí</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Minibar</li>
-                        </ul>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="h5 text-primary mb-0">2,500,000 VNĐ/đêm</span>
-                            <a href="#" class="btn btn-primary">Đặt phòng</a>
+        <% if (typeof rooms !== 'undefined' && rooms.length > 0) { %>
+            <div class="row g-4">
+                <% rooms.forEach(function(room) { %>
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title"><%= room.TypeName || 'Phòng Standard' %></h5>
+                                <p class="text-muted mb-2">Phòng số: <%= room.RoomNumber %></p>
+                                <p class="card-text"><%= room.TypeName || 'Phòng nghỉ tiện nghi với đầy đủ tiện nghi hiện đại.' %></p>
+                                <ul class="list-unstyled">
+                                    <% if (room.MaxOccupancy) { %>
+                                        <li><i class="fas fa-users text-success me-2"></i>Tối đa <%= room.MaxOccupancy %> khách</li>
+                                    <% } %>
+                                    <li><i class="fas fa-check text-success me-2"></i>WiFi miễn phí</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Điều hòa</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Tivi màn hình phẳng</li>
+                                </ul>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <% if (room.BasePrice) { %>
+                                        <span class="h5 text-primary mb-0"><%= new Intl.NumberFormat('vi-VN').format(room.BasePrice) %> VNĐ/đêm</span>
+                                    <% } else { %>
+                                        <span class="h5 text-primary mb-0">Liên hệ giá</span>
+                                    <% } %>
+                                    <a href="/rooms/detail/<%= room.RoomId %>" class="btn btn-outline-primary">Xem chi tiết</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                <% }); %>
             </div>
             
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Executive Suite</h5>
-                        <p class="card-text">Suite cao cấp với không gian rộng rãi, phòng khách riêng biệt và view biển 180°.</p>
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-check text-success me-2"></i>Phòng khách riêng</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Diện tích 80m²</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Butler service</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Jacuzzi</li>
-                        </ul>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="h5 text-primary mb-0">4,500,000 VNĐ/đêm</span>
-                            <a href="#" class="btn btn-primary">Đặt phòng</a>
+            <!-- Pagination -->
+            <% if (typeof currentPage !== 'undefined' && hasNextPage) { %>
+                <div class="row mt-4">
+                    <div class="col-12 text-center">
+                        <a href="/rooms?page=<%= currentPage + 1 %>" class="btn btn-outline-primary">Xem thêm</a>
+                    </div>
+                </div>
+            <% } %>
+        <% } else { %>
+            <% if (typeof dbError !== 'undefined' && dbError) { %>
+                <div class="alert alert-warning mb-4">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Lưu ý:</strong> Đang hiển thị dữ liệu mẫu do lỗi kết nối cơ sở dữ liệu.
+                </div>
+            <% } %>
+            <!-- Fallback to static content if no data -->
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Deluxe Ocean View</h5>
+                            <p class="card-text">Phòng deluxe với view biển tuyệt đẹp, diện tích 45m², đầy đủ tiện nghi hiện đại.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>View biển 180°</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Diện tích 45m²</li>
+                                <li><i class="fas fa-check text-success me-2"></i>WiFi miễn phí</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Minibar</li>
+                            </ul>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="h5 text-primary mb-0">2,500,000 VNĐ/đêm</span>
+                                <a href="/rooms/search" class="btn btn-primary">Đặt phòng</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Executive Suite</h5>
+                            <p class="card-text">Suite cao cấp với không gian rộng rãi, phòng khách riêng biệt và view biển 180°.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Phòng khách riêng</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Diện tích 80m²</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Butler service</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Jacuzzi</li>
+                            </ul>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="h5 text-primary mb-0">4,500,000 VNĐ/đêm</span>
+                                <a href="/rooms/search" class="btn btn-primary">Đặt phòng</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Presidential Villa</h5>
+                            <p class="card-text">Villa tổng thống với hồ bơi riêng, sân vườn và dịch vụ butler 24/7.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Hồ bơi riêng</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Diện tích 200m²</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Sân vườn</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Butler 24/7</li>
+                            </ul>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="h5 text-primary mb-0">8,500,000 VNĐ/đêm</span>
+                                <a href="/rooms/search" class="btn btn-primary">Đặt phòng</a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Presidential Villa</h5>
-                        <p class="card-text">Villa tổng thống với hồ bơi riêng, sân vườn và dịch vụ butler 24/7.</p>
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-check text-success me-2"></i>Hồ bơi riêng</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Diện tích 200m²</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Sân vườn</li>
-                            <li><i class="fas fa-check text-success me-2"></i>Butler 24/7</li>
-                        </ul>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="h5 text-primary mb-0">8,500,000 VNĐ/đêm</span>
-                            <a href="#" class="btn btn-primary">Đặt phòng</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <% } %>
     </div>
 </section>
 

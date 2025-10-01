@@ -121,6 +121,24 @@
 
                         <h3 class="mb-4">Đăng ký tài khoản khách hàng</h3>
                         
+                        <!-- Error Messages -->
+                        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    <% errors.forEach(function(error) { %>
+                                        <li><%= error.msg %></li>
+                                    <% }); %>
+                                </ul>
+                            </div>
+                        <% } %>
+
+                        <!-- Success Messages -->
+                        <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+                            <div class="alert alert-success">
+                                <%= success_msg %>
+                            </div>
+                        <% } %>
+                        
                         <form action="/auth/register" method="POST" id="registerForm">
                             <input type="hidden" name="role" value="customer">
                             
@@ -130,24 +148,24 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="firstName" class="form-label">Họ</label>
-                                        <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                        <input type="text" class="form-control" id="firstName" name="firstName" value="<%= typeof formData !== 'undefined' && formData.firstName ? formData.firstName : '' %>" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="lastName" class="form-label">Tên</label>
-                                        <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                        <input type="text" class="form-control" id="lastName" name="lastName" value="<%= typeof formData !== 'undefined' && formData.lastName ? formData.lastName : '' %>" required>
                                     </div>
                                     <div class="col-12">
                                         <label for="email" class="form-label">Email</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                            <input type="email" class="form-control" id="email" name="email" required>
+                                            <input type="email" class="form-control" id="email" name="email" value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>" required>
                                         </div>
                                     </div>
                                     <div class="col-12">
                                         <label for="phone" class="form-label">Số điện thoại</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                            <input type="tel" class="form-control" id="phone" name="phone" required>
+                                            <input type="tel" class="form-control" id="phone" name="phone" value="<%= typeof formData !== 'undefined' && formData.phone ? formData.phone : '' %>" required>
                                         </div>
                                     </div>
                                 </div>
@@ -164,14 +182,14 @@
                                         <label for="username" class="form-label">Tên đăng nhập</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                            <input type="text" class="form-control" id="username" name="username" required>
+                                            <input type="text" class="form-control" id="username" name="username" value="<%= typeof formData !== 'undefined' && formData.username ? formData.username : '' %>" required>
                                         </div>
                                     </div>
                                     <div class="col-12">
                                         <label for="password" class="form-label">Mật khẩu</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                            <input type="password" class="form-control" id="password" name="password" required>
+                                            <input type="password" class="form-control" id="password" name="password" value="<%= typeof formData !== 'undefined' && formData.password ? formData.password : '' %>" required>
                                         </div>
                                         <div class="form-text">Mật khẩu phải có ít nhất 6 ký tự</div>
                                     </div>
@@ -179,7 +197,7 @@
                                         <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" value="<%= typeof formData !== 'undefined' && formData.confirmPassword ? formData.confirmPassword : '' %>" required>
                                         </div>
                                     </div>
                                 </div>
@@ -195,19 +213,19 @@
                                 <div class="row g-3">
                                     <div class="col-12">
                                         <label for="address" class="form-label">Địa chỉ</label>
-                                        <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+                                        <textarea class="form-control" id="address" name="address" rows="3"><%= typeof formData !== 'undefined' && formData.address ? formData.address : '' %></textarea>
                                     </div>
                                     <div class="col-md-6">
                                         <label for="dateOfBirth" class="form-label">Ngày sinh</label>
-                                        <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth">
+                                        <input type="date" class="form-control" id="dateOfBirth" name="dateOfBirth" value="<%= typeof formData !== 'undefined' && formData.dateOfBirth ? formData.dateOfBirth : '' %>">
                                     </div>
                                     <div class="col-md-6">
                                         <label for="gender" class="form-label">Giới tính</label>
                                         <select class="form-select" id="gender" name="gender">
                                             <option value="">Chọn giới tính</option>
-                                            <option value="male">Nam</option>
-                                            <option value="female">Nữ</option>
-                                            <option value="other">Khác</option>
+                                            <option value="male" <%= typeof formData !== 'undefined' && formData.gender === 'male' ? 'selected' : '' %>>Nam</option>
+                                            <option value="female" <%= typeof formData !== 'undefined' && formData.gender === 'female' ? 'selected' : '' %>>Nữ</option>
+                                            <option value="other" <%= typeof formData !== 'undefined' && formData.gender === 'other' ? 'selected' : '' %>>Khác</option>
                                         </select>
                                     </div>
                                     <div class="col-12">
@@ -239,6 +257,41 @@
 
     <script>
         let currentStep = 1;
+
+        // Check if there are errors and show appropriate step
+        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+            // If there are errors, determine which step to show based on the error
+            <% 
+            let errorStep = 1;
+            if (typeof formData !== 'undefined') {
+                if (formData.username || formData.password || formData.confirmPassword) {
+                    errorStep = 2;
+                } else if (formData.address || formData.dateOfBirth || formData.gender) {
+                    errorStep = 3;
+                }
+            }
+            %>
+            currentStep = <%= errorStep %>;
+            
+            // Hide all steps first
+            document.getElementById('step1-content').style.display = 'none';
+            document.getElementById('step2-content').style.display = 'none';
+            document.getElementById('step3-content').style.display = 'none';
+            
+            // Remove active class from all steps
+            document.getElementById('step-1').classList.remove('active');
+            document.getElementById('step-2').classList.remove('active');
+            document.getElementById('step-3').classList.remove('active');
+            
+            // Show the appropriate step
+            document.getElementById(`step${currentStep}-content`).style.display = 'block';
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            
+            // Mark previous steps as completed
+            for (let i = 1; i < currentStep; i++) {
+                document.getElementById(`step-${i}`).classList.add('completed');
+            }
+        <% } %>
 
         function nextStep() {
             if (currentStep < 3) {
@@ -273,6 +326,25 @@
                 this.setCustomValidity('Mật khẩu không khớp');
             } else {
                 this.setCustomValidity('');
+            }
+        });
+
+        // Form validation before submission
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Mật khẩu xác nhận không khớp!');
+                return false;
+            }
+            
+            if (!agreeTerms) {
+                e.preventDefault();
+                alert('Vui lòng đồng ý với điều khoản sử dụng!');
+                return false;
             }
         });
     </script>

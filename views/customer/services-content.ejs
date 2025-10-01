@@ -14,71 +14,117 @@
 <section class="py-5">
     <div class="container">
         <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fas fa-spa fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">Spa & Wellness</h5>
-                        <p class="card-text">Massage, facial, body treatment với các chuyên gia hàng đầu.</p>
-                        <a href="#" class="btn btn-primary">Đặt dịch vụ</a>
+            <% if (typeof services !== 'undefined' && services.length > 0) { %>
+                <% services.forEach(function(service) { %>
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center">
+                            <% if (service.imageUrl) { %>
+                                <img src="<%= service.imageUrl %>" class="card-img-top" alt="<%= service.name %>" loading="lazy">
+                            <% } %>
+                            <div class="card-body">
+                                <i class="<%= service.icon %> fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title"><%= service.name %></h5>
+                                <p class="card-text"><%= service.description %></p>
+                                <div class="mb-3">
+                                    <small class="text-muted"><%= service.price %></small>
+                                </div>
+                                <a href="/services/detail/<%= service.id %>" class="btn btn-primary">Chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <!-- Fallback to static content if no data -->
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <img src="/images/services/spa.jpg" class="card-img-top" alt="Spa & Wellness" loading="lazy">
+                        <div class="card-body">
+                            <i class="fas fa-spa fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Spa & Wellness</h5>
+                            <p class="card-text">Massage, facial, body treatment với các chuyên gia hàng đầu.</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Từ 500,000 VNĐ</small>
+                            </div>
+                            <a href="/services/detail/1" class="btn btn-primary">Chi tiết</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fas fa-swimming-pool fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">Hồ bơi</h5>
-                        <p class="card-text">Hồ bơi vô cực với view biển tuyệt đẹp, mở cửa 24/7.</p>
-                        <a href="#" class="btn btn-primary">Tham quan</a>
+                
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <img src="/images/services/pool.jpg" class="card-img-top" alt="Hồ bơi vô cực" loading="lazy">
+                        <div class="card-body">
+                            <i class="fas fa-swimming-pool fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Hồ bơi</h5>
+                            <p class="card-text">Hồ bơi vô cực với view biển tuyệt đẹp, mở cửa 24/7.</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Miễn phí cho khách lưu trú</small>
+                            </div>
+                            <a href="/services/detail/2" class="btn btn-primary">Chi tiết</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fas fa-dumbbell fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">Gym & Fitness</h5>
-                        <p class="card-text">Phòng gym hiện đại với đầy đủ thiết bị, mở cửa 24/7.</p>
-                        <a href="#" class="btn btn-primary">Tập luyện</a>
+                
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <img src="/images/services/gym.jpg" class="card-img-top" alt="Gym hiện đại" loading="lazy">
+                        <div class="card-body">
+                            <i class="fas fa-dumbbell fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Gym & Fitness</h5>
+                            <p class="card-text">Phòng gym hiện đại với đầy đủ thiết bị, mở cửa 24/7.</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Miễn phí cho khách lưu trú</small>
+                            </div>
+                            <a href="/services/detail/3" class="btn btn-primary">Chi tiết</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fas fa-concierge-bell fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">Concierge</h5>
-                        <p class="card-text">Dịch vụ hỗ trợ 24/7, đặt tour, vé máy bay, taxi.</p>
-                        <a href="#" class="btn btn-primary">Liên hệ</a>
+                
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <img src="/images/services/concierge.jpg" class="card-img-top" alt="Concierge" loading="lazy">
+                        <div class="card-body">
+                            <i class="fas fa-concierge-bell fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Concierge</h5>
+                            <p class="card-text">Dịch vụ hỗ trợ 24/7, đặt tour, vé máy bay, taxi.</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Phí dịch vụ theo yêu cầu</small>
+                            </div>
+                            <a href="/services/detail/4" class="btn btn-primary">Chi tiết</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">Nhà hàng</h5>
-                        <p class="card-text">Ẩm thực Việt Nam và quốc tế với nguyên liệu tươi ngon.</p>
-                        <a href="#" class="btn btn-primary">Đặt bàn</a>
+                
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <img src="/images/services/restaurant.jpg" class="card-img-top" alt="Nhà hàng" loading="lazy">
+                        <div class="card-body">
+                            <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Nhà hàng</h5>
+                            <p class="card-text">Ẩm thực Việt Nam và quốc tế với nguyên liệu tươi ngon.</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Menu đa dạng từ 200,000 VNĐ</small>
+                            </div>
+                            <a href="/services/detail/5" class="btn btn-primary">Chi tiết</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card h-100 text-center">
-                    <div class="card-body">
-                        <i class="fas fa-car fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">Xe đưa đón</h5>
-                        <p class="card-text">Dịch vụ xe đưa đón sân bay và các điểm du lịch.</p>
-                        <a href="#" class="btn btn-primary">Đặt xe</a>
+                
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <img src="/images/services/transport.jpg" class="card-img-top" alt="Xe đưa đón sân bay" loading="lazy">
+                        <div class="card-body">
+                            <i class="fas fa-car fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Xe đưa đón</h5>
+                            <p class="card-text">Dịch vụ xe đưa đón sân bay và các điểm du lịch.</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Từ 800,000 VNĐ/chuyến</small>
+                            </div>
+                            <a href="/services/detail/6" class="btn btn-primary">Chi tiết</a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            <% } %>
         </div>
     </div>
 </section>

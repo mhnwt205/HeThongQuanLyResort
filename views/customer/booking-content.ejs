@@ -1,0 +1,343 @@
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Booking Form -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Thông tin đặt phòng</h4>
+                </div>
+                <div class="card-body">
+                    <form id="bookingForm">
+                        <!-- Room Selection -->
+                        <div class="mb-4">
+                            <h5>1. Chọn phòng</h5>
+                            <% if (typeof room !== 'undefined' && room) { %>
+                                <div class="alert alert-info">
+                                    <h6><%= room.TypeName %></h6>
+                                    <p class="mb-1">Phòng số: <%= room.RoomNumber %></p>
+                                    <p class="mb-1">Giá: <%= room.BasePrice ? new Intl.NumberFormat('vi-VN').format(room.BasePrice) + ' VNĐ/đêm' : 'Liên hệ giá' %></p>
+                                    <% if (room.MaxOccupancy) { %>
+                                        <p class="mb-0">Sức chứa: Tối đa <%= room.MaxOccupancy %> khách</p>
+                                    <% } %>
+                                </div>
+                                <input type="hidden" id="roomId" name="roomId" value="<%= room.RoomId %>">
+                            <% } else { %>
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Vui lòng chọn phòng từ trang tìm kiếm phòng trước khi đặt.
+                                </div>
+                                <a href="/rooms/search" class="btn btn-primary">Tìm kiếm phòng</a>
+                            <% } %>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="mb-4">
+                            <h5>2. Ngày lưu trú</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="checkInDate" class="form-label">Ngày check-in *</label>
+                                    <input type="date" class="form-control" id="checkInDate" name="checkInDate" 
+                                           value="<%= typeof checkInDate !== 'undefined' ? checkInDate : '' %>" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="checkOutDate" class="form-label">Ngày check-out *</label>
+                                    <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" 
+                                           value="<%= typeof checkOutDate !== 'undefined' ? checkOutDate : '' %>" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Guests -->
+                        <div class="mb-4">
+                            <h5>3. Số khách</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="adults" class="form-label">Người lớn *</label>
+                                    <select class="form-select" id="adults" name="adults" required>
+                                        <option value="">Chọn số người lớn</option>
+                                        <option value="1">1 người</option>
+                                        <option value="2" selected>2 người</option>
+                                        <option value="3">3 người</option>
+                                        <option value="4">4 người</option>
+                                        <option value="5">5+ người</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="children" class="form-label">Trẻ em</label>
+                                    <select class="form-select" id="children" name="children">
+                                        <option value="0">0 trẻ em</option>
+                                        <option value="1">1 trẻ em</option>
+                                        <option value="2">2 trẻ em</option>
+                                        <option value="3">3 trẻ em</option>
+                                        <option value="4">4+ trẻ em</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Info -->
+                        <div class="mb-4">
+                            <h5>4. Thông tin khách hàng</h5>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="customerName" class="form-label">Họ và tên *</label>
+                                    <input type="text" class="form-control" id="customerName" name="customerName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="customerEmail" class="form-label">Email *</label>
+                                    <input type="email" class="form-control" id="customerEmail" name="customerEmail" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="customerPhone" class="form-label">Số điện thoại *</label>
+                                    <input type="tel" class="form-control" id="customerPhone" name="customerPhone" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="customerAddress" class="form-label">Địa chỉ</label>
+                                    <textarea class="form-control" id="customerAddress" name="customerAddress" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Special Requests -->
+                        <div class="mb-4">
+                            <h5>5. Yêu cầu đặc biệt</h5>
+                            <textarea class="form-control" id="specialRequests" name="specialRequests" rows="3" 
+                                      placeholder="Vui lòng cho chúng tôi biết nếu bạn có yêu cầu đặc biệt nào khác..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-calendar-check me-2"></i>Đặt phòng ngay
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Booking Summary -->
+            <div class="card sticky-top">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Tóm tắt đặt phòng</h5>
+                </div>
+                <div class="card-body">
+                    <div id="bookingSummary">
+                        <p class="text-muted">Vui lòng điền thông tin để xem tóm tắt</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-headset me-2"></i>Hỗ trợ đặt phòng</h5>
+                    <p class="mb-1"><strong>Hotline:</strong> 1900 1234</p>
+                    <p class="mb-1"><strong>Email:</strong> booking@paradise-resort.com</p>
+                    <p class="mb-0"><strong>Thời gian:</strong> 24/7</p>
+                </div>
+            </div>
+
+            <!-- Policies -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5><i class="fas fa-info-circle me-2"></i>Chính sách</h5>
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-check text-success me-2"></i>Miễn phí hủy 24h trước</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Thanh toán 30% cọc</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Check-in: 14:00</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Check-out: 12:00</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Đặt phòng thành công!</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="successContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Đóng</button>
+                <a href="#" id="viewBookingBtn" class="btn btn-outline-success">Xem chi tiết</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('checkInDate').min = today;
+    document.getElementById('checkOutDate').min = today;
+
+    // Handle check-in date change
+    document.getElementById('checkInDate').addEventListener('change', function() {
+        const checkInDate = this.value;
+        const checkOutInput = document.getElementById('checkOutDate');
+        
+        if (checkInDate) {
+            const nextDay = new Date(checkInDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            checkOutInput.min = nextDay.toISOString().split('T')[0];
+            
+            if (checkOutInput.value && checkOutInput.value <= checkInDate) {
+                checkOutInput.value = '';
+            }
+        }
+        updateBookingSummary();
+    });
+
+    // Handle form changes for summary update
+    ['checkInDate', 'checkOutDate', 'adults', 'children'].forEach(id => {
+        document.getElementById(id).addEventListener('change', updateBookingSummary);
+    });
+
+    // Handle form submission
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const bookingData = {
+            roomId: formData.get('roomId'),
+            checkInDate: formData.get('checkInDate'),
+            checkOutDate: formData.get('checkOutDate'),
+            adults: formData.get('adults'),
+            children: formData.get('children'),
+            customerName: formData.get('customerName'),
+            customerEmail: formData.get('customerEmail'),
+            customerPhone: formData.get('customerPhone'),
+            customerAddress: formData.get('customerAddress'),
+            specialRequests: formData.get('specialRequests')
+        };
+
+        // Validate
+        if (!bookingData.roomId) {
+            alert('Vui lòng chọn phòng từ trang tìm kiếm');
+            return;
+        }
+
+        // Show loading
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+        submitBtn.disabled = true;
+
+        // Make API call
+        fetch('/booking/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bookingData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccessModal(data.data);
+                this.reset();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Đã xảy ra lỗi khi đặt phòng');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    });
+
+    function updateBookingSummary() {
+        const checkInDate = document.getElementById('checkInDate').value;
+        const checkOutDate = document.getElementById('checkOutDate').value;
+        const adults = document.getElementById('adults').value;
+        const children = document.getElementById('children').value;
+
+        if (!checkInDate || !checkOutDate || !adults) {
+            document.getElementById('bookingSummary').innerHTML = '<p class="text-muted">Vui lòng điền thông tin để xem tóm tắt</p>';
+            return;
+        }
+
+        const checkIn = new Date(checkInDate);
+        const checkOut = new Date(checkOutDate);
+        const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+
+        let html = `
+            <div class="row mb-2">
+                <div class="col-6">Số đêm:</div>
+                <div class="col-6 text-end"><strong>${nights} đêm</strong></div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Người lớn:</div>
+                <div class="col-6 text-end"><strong>${adults} người</strong></div>
+            </div>
+        `;
+
+        if (children && children !== '0') {
+            html += `
+                <div class="row mb-2">
+                    <div class="col-6">Trẻ em:</div>
+                    <div class="col-6 text-end"><strong>${children} trẻ em</strong></div>
+                </div>
+            `;
+        }
+
+        <% if (typeof room !== 'undefined' && room && room.BasePrice) { %>
+            const basePrice = <%= room.BasePrice %>;
+            const totalAmount = basePrice * nights;
+            const depositAmount = Math.round(totalAmount * 0.3);
+
+            html += `
+                <hr>
+                <div class="row mb-2">
+                    <div class="col-6">Giá/đêm:</div>
+                    <div class="col-6 text-end"><strong>${new Intl.NumberFormat('vi-VN').format(basePrice)} VNĐ</strong></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Tổng tiền:</div>
+                    <div class="col-6 text-end"><strong>${new Intl.NumberFormat('vi-VN').format(totalAmount)} VNĐ</strong></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-6">Cọc (30%):</div>
+                    <div class="col-6 text-end"><strong class="text-primary">${new Intl.NumberFormat('vi-VN').format(depositAmount)} VNĐ</strong></div>
+                </div>
+            `;
+        <% } %>
+
+        document.getElementById('bookingSummary').innerHTML = html;
+    }
+
+    function showSuccessModal(data) {
+        const content = `
+            <div class="alert alert-success">
+                <h6>Mã đặt phòng: <strong>${data.bookingCode}</strong></h6>
+                <p class="mb-1">Phòng: <strong>${data.room.roomNumber} - ${data.room.typeName}</strong></p>
+                <p class="mb-1">Số đêm: <strong>${data.nights} đêm</strong></p>
+                <p class="mb-1">Tổng tiền: <strong>${new Intl.NumberFormat('vi-VN').format(data.totalAmount)} VNĐ</strong></p>
+                <p class="mb-0">Cọc: <strong class="text-primary">${new Intl.NumberFormat('vi-VN').format(data.depositAmount)} VNĐ</strong></p>
+            </div>
+            <p class="mb-0">Chúng tôi sẽ liên hệ với bạn trong vòng 30 phút để xác nhận đặt phòng.</p>
+        `;
+
+        document.getElementById('successContent').innerHTML = content;
+        document.getElementById('viewBookingBtn').href = `/booking/detail/${data.bookingCode}`;
+        
+        const modal = new bootstrap.Modal(document.getElementById('successModal'));
+        modal.show();
+    }
+
+    // Initialize summary if dates are pre-filled
+    updateBookingSummary();
+});
+</script>
+

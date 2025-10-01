@@ -105,6 +105,24 @@
                             </button>
                         </div>
 
+                        <!-- Error Messages -->
+                        <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    <% errors.forEach(function(error) { %>
+                                        <li><%= error.msg %></li>
+                                    <% }); %>
+                                </ul>
+                            </div>
+                        <% } %>
+
+                        <!-- Success Messages -->
+                        <% if (typeof success_msg !== 'undefined' && success_msg.length > 0) { %>
+                            <div class="alert alert-success">
+                                <%= success_msg %>
+                            </div>
+                        <% } %>
+
                         <!-- Customer Login Form -->
                         <div id="customer-form">
                             <h3 class="mb-4">Đăng nhập khách hàng</h3>
@@ -114,7 +132,7 @@
                                     <label for="customer-email" class="form-label">Email</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                        <input type="email" class="form-control" id="customer-email" name="email" required>
+                                        <input type="email" class="form-control" id="customer-email" name="email" value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>" required>
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -146,7 +164,7 @@
                                     <label for="admin-username" class="form-label">Tên đăng nhập</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                        <input type="text" class="form-control" id="admin-username" name="username" required>
+                                        <input type="text" class="form-control" id="admin-username" name="username" value="<%= typeof formData !== 'undefined' && formData.username ? formData.username : '' %>" required>
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -177,6 +195,13 @@
             document.getElementById('customer-form').style.display = role === 'customer' ? 'block' : 'none';
             document.getElementById('admin-form').style.display = role === 'admin' ? 'block' : 'none';
         }
+
+        // Auto-switch role based on form data when there are errors
+        <% if (typeof formData !== 'undefined' && formData.role) { %>
+            document.addEventListener('DOMContentLoaded', function() {
+                switchRole('<%= formData.role %>');
+            });
+        <% } %>
     </script>
 </body>
 </html>

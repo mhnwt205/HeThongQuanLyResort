@@ -73,22 +73,22 @@ class Booking {
     static async create(bookingData) {
         const {
             bookingCode, customerId, roomId, checkInDate, checkOutDate,
-            adults, children, status, totalAmount, depositAmount, specialRequests, createdBy
+            adults, children, status, totalAmount, depositAmount, specialRequests, createdBy, paymentMethod
         } = bookingData;
 
         const sql = `
             INSERT INTO Bookings (
                 BookingCode, CustomerId, RoomId, CheckInDate, CheckOutDate,
-                Adults, Children, Status, TotalAmount, DepositAmount, SpecialRequests, CreatedBy
+                Adults, Children, Status, TotalAmount, DepositAmount, SpecialRequests, CreatedBy, PaymentMethod
             ) VALUES (
-                @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12
+                @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13
             );
             SELECT SCOPE_IDENTITY() as BookingId;
         `;
 
         const result = await query(sql, [
             bookingCode, customerId, roomId, checkInDate, checkOutDate,
-            adults, children, status, totalAmount, depositAmount, specialRequests, createdBy
+            adults, children, status, totalAmount, depositAmount, specialRequests, createdBy, paymentMethod || 'cash'
         ]);
 
         return await this.getById(result[0].BookingId);
@@ -237,6 +237,22 @@ class Booking {
             ORDER BY b.CheckInDate
         `;
         return await query(sql, [date]);
+    }
+
+    /**
+     * Cập nhật trạng thái thanh toán
+     * @param {number} id - ID đặt phòng
+     * @param {string} paymentStatus - Trạng thái thanh toán
+     * @returns {Promise<Object>} Đặt phòng đã cập nhật
+     */
+    static async updatePaymentStatus(id, paymentStatus) {
+        const sql = `
+            UPDATE Bookings SET PaymentStatus = @p2, UpdatedAt = GETDATE()
+            WHERE BookingId = @p1
+        `;
+
+        await query(sql, [id, paymentStatus]);
+        return await this.getById(id);
     }
 
     /**

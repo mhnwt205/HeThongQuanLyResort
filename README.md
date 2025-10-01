@@ -88,31 +88,34 @@ cd ResortManagement
 npm install
 ```
 
-### 3. Cấu Hình SQL Server
+### 3. Setup Tự Động (Khuyến nghị)
 ```bash
-# Tạo file .env từ template
+# Chạy script setup tự động
+npm run setup
+```
+
+Script này sẽ tự động:
+- Tạo file `.env` từ `env.example`
+- Tạo các thư mục cần thiết (`public/images`, `uploads`, `logs`)
+- Cấu hình sẵn database connection
+
+### 4. Cấu Hình SQL Server (Nếu cần)
+```bash
+# Tạo file .env từ template (nếu chưa có)
 cp env.example .env
 
 # Chỉnh sửa file .env với thông tin SQL Server của bạn
 DB_HOST=localhost
-DB_USER=sa
-DB_PASSWORD=yourStrong(!)Password
+DB_USER=testuser
+DB_PASSWORD=123456
 DB_NAME=ResortManagement
 DB_PORT=1433
+DB_INTEGRATED_AUTH=false
 ```
 
-### 4. Thiết Lập SQL Server
+### 5. Thiết Lập SQL Server
 
-#### Cách 1: Sử dụng PowerShell Script (Khuyến nghị)
-```powershell
-# Chạy script PowerShell để setup database
-.\scripts\setup-database.ps1
-
-# Hoặc với tham số tùy chỉnh
-.\scripts\setup-database.ps1 -Server "localhost" -Username "sa" -Password "yourPassword"
-```
-
-#### Cách 2: Sử dụng npm scripts
+#### Cách 1: Sử dụng npm scripts (Khuyến nghị)
 ```bash
 # Tạo database và import schema
 npm run db:setup
@@ -121,13 +124,13 @@ npm run db:setup
 npm run db:reset
 ```
 
-#### Cách 3: Chạy thủ công
+#### Cách 2: Chạy thủ công
 ```bash
 # Tạo database
-sqlcmd -S localhost -U sa -P yourStrong(!)Password -Q "CREATE DATABASE ResortManagement"
+sqlcmd -S localhost -U testuser -P 123456 -Q "CREATE DATABASE ResortManagement"
 
 # Chạy migration
-sqlcmd -S localhost -U sa -P yourStrong(!)Password -d ResortManagement -i database/migration_fixed.sql
+sqlcmd -S localhost -U testuser -P 123456 -d ResortManagement -i database/migration_fixed.sql
 ```
 
 **Lưu ý**: 
@@ -135,7 +138,7 @@ sqlcmd -S localhost -U sa -P yourStrong(!)Password -d ResortManagement -i databa
 - Script sẽ tự động tạo database `ResortManagement` nếu chưa tồn tại
 - Nếu gặp lỗi, hãy kiểm tra SQL Server Authentication đã được bật
 
-### 5. Chạy Ứng Dụng
+### 6. Chạy Ứng Dụng
 ```bash
 # Development mode
 npm run dev
@@ -280,6 +283,9 @@ npm start
 ## 🔧 Scripts
 
 ```bash
+# Setup tự động (lần đầu)
+npm run setup
+
 # Chạy development server
 npm run dev
 

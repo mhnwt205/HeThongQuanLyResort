@@ -1,0 +1,215 @@
+<div class="container py-5">
+    <!-- Search Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-search me-2"></i>Tìm kiếm phòng</h4>
+                </div>
+                <div class="card-body">
+                    <form id="searchForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="checkInDate" class="form-label">Ngày check-in</label>
+                                <input type="date" class="form-control" id="checkInDate" name="checkInDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="checkOutDate" class="form-label">Ngày check-out</label>
+                                <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="roomTypeId" class="form-label">Loại phòng</label>
+                                <select class="form-select" id="roomTypeId" name="roomTypeId">
+                                    <option value="">Tất cả loại phòng</option>
+                                    <% if (typeof roomTypes !== 'undefined' && roomTypes.length > 0) { %>
+                                        <% roomTypes.forEach(function(type) { %>
+                                            <option value="<%= type.RoomTypeId %>"><%= type.TypeName %></option>
+                                        <% }); %>
+                                    <% } %>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="guests" class="form-label">Số khách</label>
+                                <select class="form-select" id="guests" name="guests">
+                                    <option value="">Chọn số khách</option>
+                                    <option value="1">1 khách</option>
+                                    <option value="2">2 khách</option>
+                                    <option value="3">3 khách</option>
+                                    <option value="4">4 khách</option>
+                                    <option value="5">5+ khách</option>
+                                </select>
+                            </div>
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-search me-2"></i>Tìm kiếm phòng
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    <div id="searchResults" class="mt-5" style="display: none;">
+        <div class="row">
+            <div class="col-12">
+                <h3 class="mb-4">Kết quả tìm kiếm</h3>
+                <div id="resultsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="text-center mt-5" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tìm kiếm...</span>
+        </div>
+        <p class="mt-2">Đang tìm kiếm phòng phù hợp...</p>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('checkInDate').min = today;
+    document.getElementById('checkOutDate').min = today;
+
+    // Handle check-in date change
+    document.getElementById('checkInDate').addEventListener('change', function() {
+        const checkInDate = this.value;
+        const checkOutInput = document.getElementById('checkOutDate');
+        
+        if (checkInDate) {
+            const nextDay = new Date(checkInDate);
+            nextDay.setDate(nextDay.getDate() + 1);
+            checkOutInput.min = nextDay.toISOString().split('T')[0];
+            
+            if (checkOutInput.value && checkOutInput.value <= checkInDate) {
+                checkOutInput.value = '';
+            }
+        }
+    });
+
+    // Handle form submission
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const searchParams = {
+            checkInDate: formData.get('checkInDate'),
+            checkOutDate: formData.get('checkOutDate'),
+            roomTypeId: formData.get('roomTypeId'),
+            guests: formData.get('guests')
+        };
+
+        // Validate dates
+        if (!searchParams.checkInDate || !searchParams.checkOutDate) {
+            alert('Vui lòng chọn ngày check-in và check-out');
+            return;
+        }
+
+        if (new Date(searchParams.checkOutDate) <= new Date(searchParams.checkInDate)) {
+            alert('Ngày check-out phải sau ngày check-in');
+            return;
+        }
+
+        searchRooms(searchParams);
+    });
+
+    function searchRooms(params) {
+        // Show loading
+        document.getElementById('loadingSpinner').style.display = 'block';
+        document.getElementById('searchResults').style.display = 'none';
+
+        // Build query string
+        const queryString = new URLSearchParams(params).toString();
+        
+        // Make API call
+        fetch(`/rooms/api/available?${queryString}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                
+                if (data.success) {
+                    displayResults(data.data, params);
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi tìm kiếm phòng');
+            });
+    }
+
+    function displayResults(rooms, searchParams) {
+        const resultsContainer = document.getElementById('resultsContainer');
+        
+        if (rooms.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Không tìm thấy phòng phù hợp với tiêu chí tìm kiếm của bạn.
+                </div>
+            `;
+        } else {
+            let html = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Tìm thấy ${rooms.length} phòng phù hợp
+                </div>
+                <div class="row g-4">
+            `;
+
+            rooms.forEach(room => {
+                html += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${room.TypeName || 'Phòng Standard'}</h5>
+                                <p class="text-muted mb-2">Phòng số: ${room.RoomNumber}</p>
+                                <p class="card-text">${room.TypeName || 'Phòng nghỉ tiện nghi'}</p>
+                                <ul class="list-unstyled">
+                                    ${room.MaxOccupancy ? `<li><i class="fas fa-users text-success me-2"></i>Tối đa ${room.MaxOccupancy} khách</li>` : ''}
+                                    <li><i class="fas fa-check text-success me-2"></i>WiFi miễn phí</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Điều hòa</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Tivi màn hình phẳng</li>
+                                </ul>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="h5 text-primary mb-0">
+                                        ${room.BasePrice ? new Intl.NumberFormat('vi-VN').format(room.BasePrice) + ' VNĐ/đêm' : 'Liên hệ giá'}
+                                    </span>
+                                    <button class="btn btn-primary" onclick="bookRoom(${room.RoomId}, '${searchParams.checkInDate}', '${searchParams.checkOutDate}')">
+                                        Đặt phòng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            resultsContainer.innerHTML = html;
+        }
+
+        document.getElementById('searchResults').style.display = 'block';
+    }
+
+    // Book room function
+    window.bookRoom = function(roomId, checkInDate, checkOutDate) {
+        // Redirect to booking page with parameters
+        const params = new URLSearchParams({
+            roomId: roomId,
+            checkInDate: checkInDate,
+            checkOutDate: checkOutDate
+        });
+        window.location.href = `/booking?${params.toString()}`;
+    };
+});
+</script>
+

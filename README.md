@@ -310,19 +310,4 @@ npm test
 - File upload tối đa 10MB
 - Logs được lưu trong thư mục `./logs`
 
-## 🤝 Đóng Góp
-
-1. Fork repository
-2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Mở Pull Request
-
-## 📄 License
-
-Distributed under the ISC License. See `LICENSE` for more information.
-
-
-
----
 

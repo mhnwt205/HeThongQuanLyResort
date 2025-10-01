@@ -149,7 +149,7 @@ class AuthController {
             }
 
             // Kiểm tra email/username đã tồn tại
-            const emailExists = await User.exists(email);
+            const emailExists = email ? await User.exists(email) : false;
             if (emailExists) {
                 return res.render('auth/register', {
                     title: 'Đăng ký - Paradise Resort & Spa',
